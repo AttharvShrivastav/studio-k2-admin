@@ -2,7 +2,11 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardPage } from "@/pages/DashboardPage";
+import { ArchivePage } from "@/pages/ArchivePage";
 import { LoginPage } from "@/pages/LoginPage";
+import { NewProjectPage } from "@/pages/NewProjectPage";
+import { ProjectEditPage } from "@/pages/ProjectEditPage";
+import { ProjectsPage } from "@/pages/ProjectsPage";
 
 export function App() {
   return (
@@ -11,6 +15,10 @@ export function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="projects/new" element={<NewProjectPage />} />
+          <Route path="projects/:id" element={<ProjectEditPage />} />
+          <Route path="archive" element={<ArchivePage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

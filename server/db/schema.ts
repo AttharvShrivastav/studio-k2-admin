@@ -1,11 +1,18 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
+  integer,
+  jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -95,3 +102,45 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const projectCategory = pgEnum("project_category", ["built", "unbuilt"]);
+export const projectStatus = pgEnum("project_status", ["active", "archived"]);
+export const projectTemplateType = pgEnum("project_template_type", [
+  "template-1",
+  "template-2",
+  "template-3",
+  "template-4",
+]);
+
+type ProjectConfig = Record<string, unknown>;
+
+export const projects = pgTable(
+  "projects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    category: projectCategory("category").notNull(),
+    status: projectStatus("status").default("active").notNull(),
+    templateType: projectTemplateType("template_type").notNull(),
+    location: text("location"),
+    area: text("area"),
+    year: text("year"),
+    browserOrder: integer("browser_order").default(0).notNull(),
+    browserImage: jsonb("browser_image").$type<ProjectConfig>().default({}).notNull(),
+    hero: jsonb("hero").$type<ProjectConfig>().default({}).notNull(),
+    themeConfig: jsonb("theme_config").$type<ProjectConfig>().default({}).notNull(),
+    templateConfig: jsonb("template_config").$type<ProjectConfig>().default({}).notNull(),
+    galleryConfig: jsonb("gallery_config").$type<ProjectConfig>().default({}).notNull(),
+    footerConfig: jsonb("footer_config").$type<ProjectConfig>().default({}).notNull(),
+    seoConfig: jsonb("seo_config").$type<ProjectConfig>().default({}).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("projects_slug_unique").on(table.slug),
+    index("projects_status_browser_order_idx").on(table.status, table.browserOrder),
+    check("projects_browser_order_non_negative", sql`${table.browserOrder} >= 0`),
+  ],
+);

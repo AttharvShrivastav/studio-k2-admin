@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
 import { queryClient } from "@/lib/query-client";
 import { Brand } from "./Brand";
@@ -14,12 +14,12 @@ import {
 } from "./icons";
 
 const navigation = [
-  { label: "Dashboard", icon: GridIcon, active: true },
-  { label: "Projects", icon: FolderIcon },
+  { label: "Dashboard", icon: GridIcon, to: "/" },
+  { label: "Projects", icon: FolderIcon, to: "/projects" },
   { label: "Homepage", icon: HomeIcon },
   { label: "Site Settings", icon: SettingsIcon },
   { label: "Contact Enquiries", icon: MailIcon },
-  { label: "Archive", icon: ArchiveIcon },
+  { label: "Archive", icon: ArchiveIcon, to: "/archive" },
 ];
 
 export function AdminLayout() {
@@ -45,17 +45,29 @@ export function AdminLayout() {
                 const NavIcon = item.icon;
                 return (
                   <li key={item.label}>
-                    <button
-                      className={`nav-item${item.active ? " nav-item-active" : ""}`}
-                      type="button"
-                      disabled={!item.active}
-                      aria-current={item.active ? "page" : undefined}
-                      title={item.active ? undefined : `${item.label} is coming next`}
-                    >
-                      <NavIcon />
-                      <span>{item.label}</span>
-                      {!item.active && <span className="nav-soon">Soon</span>}
-                    </button>
+                    {item.to ? (
+                      <NavLink
+                        className={({ isActive }) =>
+                          `nav-item${isActive ? " nav-item-active" : ""}`
+                        }
+                        to={item.to}
+                        end={item.to === "/"}
+                      >
+                        <NavIcon />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    ) : (
+                      <button
+                        className="nav-item"
+                        type="button"
+                        disabled
+                        title={`${item.label} is coming next`}
+                      >
+                        <NavIcon />
+                        <span>{item.label}</span>
+                        <span className="nav-soon">Soon</span>
+                      </button>
+                    )}
                   </li>
                 );
               })}

@@ -14,7 +14,7 @@ The public website is a separate repository and is not imported or modified by t
 - TanStack Query for admin data fetching
 - React Hook Form for forms
 
-Only the authentication tables exist today. Projects, homepage content, site settings, contact enquiries, archive behavior, and uploads are intentionally out of scope.
+The first CMS module covers project listing, basic metadata, and reversible archive/restore. Template content, homepage content, site settings, contact enquiries, and uploads remain intentionally out of scope.
 
 ## Project structure
 
@@ -33,6 +33,7 @@ server/               Fastify application
 shared/               Shared Zod schemas and TypeScript types
 drizzle/              Versioned SQL migrations and metadata
 docs/ARCHITECTURE.md   Locked architectural decisions
+docs/PROJECTS.md       Project schema, lifecycle, and route contract
 ```
 
 ## Local setup

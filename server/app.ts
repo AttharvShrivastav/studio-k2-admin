@@ -6,6 +6,7 @@ import path from "node:path";
 import { env } from "./lib/env.js";
 import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
+import { projectRoutes } from "./routes/projects.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -24,6 +25,7 @@ export async function buildApp() {
 
   await app.register(healthRoutes, { prefix: "/api" });
   await app.register(authRoutes, { prefix: "/api" });
+  await app.register(projectRoutes, { prefix: "/api/admin" });
 
   const clientDirectory = path.resolve(process.cwd(), "dist/client");
   if (existsSync(clientDirectory)) {

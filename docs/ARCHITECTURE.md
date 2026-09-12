@@ -21,7 +21,24 @@ During development, Vite and Fastify run concurrently. The browser uses relative
 
 Better Auth is mounted at `/api/auth/*`. Public sign-up is disabled. Administrators are provisioned deliberately with the server-side `npm run admin:create` command. There are no roles, organizations, or permission matrices in this foundation.
 
-The only custom API route is `GET /api/health`. The only PostgreSQL tables are Better Auth's required `user`, `session`, `account`, and `verification` tables, plus Drizzle's migration journal. No Studio K2 business table exists yet.
+The API includes the public `GET /api/health` route and authenticated project-management routes under `/api/admin/projects`. PostgreSQL contains Better Auth's required tables and the Studio K2 `projects` table, plus Drizzle's migration journal.
+
+## Projects module
+
+`projects` stores common, queryable metadata in relational columns: identity, category, lifecycle status, template selection, listing details, ordering, and timestamps. PostgreSQL enums constrain category, status, and template type. Slugs are unique and browser order is non-negative.
+
+The lifecycle is reversible: new projects begin `active`; archive sets `status = archived` and `archivedAt`; restore sets `status = active` and clears `archivedAt`. There is no permanent-delete endpoint.
+
+Authenticated routes are:
+
+- `GET /api/admin/projects?status=active|archived`
+- `GET /api/admin/projects/:id`
+- `POST /api/admin/projects`
+- `PATCH /api/admin/projects/:id`
+- `POST /api/admin/projects/:id/archive`
+- `POST /api/admin/projects/:id/restore`
+
+The seven JSONB columns—`browserImage`, `hero`, `themeConfig`, `templateConfig`, `galleryConfig`, `footerConfig`, and `seoConfig`—reserve ownership for their corresponding future project-editor sections. The common metadata endpoint cannot write them. Their validated shapes and editing routes must be introduced with the template-editor work, not inferred here.
 
 ## Persistence and migrations
 
@@ -33,7 +50,7 @@ Migrations are generated with `npm run db:generate`, reviewed in `drizzle/`, and
 
 - Do not split the API into another repository or introduce monorepo tooling.
 - Do not replace the locked stack with a generic CMS, hosted backend, GraphQL, microservices, queues, Redis, or Docker by default.
-- Do not create Projects, Homepage, Site Settings, Contact Enquiries, or Archive schemas until their data model is approved.
+- Do not create Homepage, Site Settings, or Contact Enquiries schemas until their data model is approved.
 - Future media UX is field-level upload/replace. Do not introduce a central media library.
 - Do not import or modify the separate Studio K2 public frontend repository from this admin project.
 
