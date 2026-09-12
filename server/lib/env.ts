@@ -10,6 +10,7 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.url().default("http://localhost:3001"),
   ADMIN_ORIGIN: z.url().default("http://localhost:5173"),
   PORT: z.coerce.number().int().positive().max(65_535).default(3001),
+  UPLOAD_ROOT: z.string().trim().min(1).default("./var/uploads"),
 });
 
 const result = envSchema.safeParse(process.env);

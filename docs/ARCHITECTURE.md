@@ -55,3 +55,11 @@ Migrations are generated with `npm run db:generate`, reviewed in `drizzle/`, and
 - Do not import or modify the separate Studio K2 public frontend repository from this admin project.
 
 New work should extend the existing `server/routes`, `server/db`, `shared`, and `src` boundaries without re-architecting the foundation.
+
+## Project editor
+
+`docs/FRONTEND-CONTRACT.md` is the locked boundary for all project-owned content. The editor reads and saves one complete, strict Zod payload through `/api/admin/projects/:id/editor`; the server updates the relational basics and seven JSONB owners in one database transaction. Empty foundation-era `{}` values are normalized to safe template defaults at read time. Nonempty invalid stored values are surfaced for manual review rather than silently discarded.
+
+Template switching preserves General, Browser, Hero, Theme, Gallery, Footer, and SEO. Meaningful existing `templateConfig` requires explicit client confirmation and a server confirmation flag before it is replaced with defaults for the selected template. Disabled sections retain their content. ProjectNavigation, animation choreography, isometric composition controls, and Template 4's undocumented horizontal-frame union remain frontend-owned.
+
+Uploads are authenticated field-level actions backed by an isolated filesystem adapter. `UPLOAD_ROOT` must point outside generated output and, in production, at persistent infrastructure. Public media is served only through generated storage keys under `/api/uploads/*`; the browser never receives an absolute filesystem path. Upload replacement/removal does not delete the old file.

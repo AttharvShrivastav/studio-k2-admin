@@ -1,4 +1,5 @@
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import { existsSync } from "node:fs";
@@ -6,7 +7,9 @@ import path from "node:path";
 import { env } from "./lib/env.js";
 import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
+import { projectEditorRoutes } from "./routes/project-editor.js";
 import { projectRoutes } from "./routes/projects.js";
+import { uploadRoutes } from "./routes/uploads.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -19,13 +22,17 @@ export async function buildApp() {
   await app.register(cors, {
     origin: env.ADMIN_ORIGIN,
     credentials: true,
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
+
+  await app.register(multipart, { limits: { files: 500, fileSize: 10 * 1024 * 1024, parts: 510 } });
 
   await app.register(healthRoutes, { prefix: "/api" });
   await app.register(authRoutes, { prefix: "/api" });
   await app.register(projectRoutes, { prefix: "/api/admin" });
+  await app.register(projectEditorRoutes, { prefix: "/api/admin" });
+  await app.register(uploadRoutes, { prefix: "/api" });
 
   const clientDirectory = path.resolve(process.cwd(), "dist/client");
   if (existsSync(clientDirectory)) {

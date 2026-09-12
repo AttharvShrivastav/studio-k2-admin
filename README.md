@@ -14,7 +14,7 @@ The public website is a separate repository and is not imported or modified by t
 - TanStack Query for admin data fetching
 - React Hook Form for forms
 
-The first CMS module covers project listing, basic metadata, and reversible archive/restore. Template content, homepage content, site settings, contact enquiries, and uploads remain intentionally out of scope.
+The Projects module includes listing, reversible archive/restore, and a contract-validated, template-aware editor with direct field uploads. Homepage content, site settings, contact enquiries, and public frontend integration remain out of scope.
 
 ## Project structure
 
@@ -34,6 +34,8 @@ shared/               Shared Zod schemas and TypeScript types
 drizzle/              Versioned SQL migrations and metadata
 docs/ARCHITECTURE.md   Locked architectural decisions
 docs/PROJECTS.md       Project schema, lifecycle, and route contract
+docs/PROJECT-EDITOR.md Project editor ownership and validation
+docs/UPLOADS.md        Field-level upload storage and security
 ```
 
 ## Local setup
@@ -66,6 +68,7 @@ The development command starts Vite at `http://localhost:5173` and Fastify at `h
 | `BETTER_AUTH_URL` | Canonical backend/application URL; `http://localhost:3001` locally |
 | `ADMIN_ORIGIN` | Allowed admin browser origin; `http://localhost:5173` locally |
 | `PORT` | Fastify port; defaults to `3001` |
+| `UPLOAD_ROOT` | Persistent filesystem directory for uploaded media; defaults to `./var/uploads` locally |
 
 All required server configuration is validated with Zod before startup. Never commit `.env`.
 

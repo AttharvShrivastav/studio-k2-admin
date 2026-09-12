@@ -37,7 +37,7 @@ Every route requires a valid Better Auth session. Duplicate slugs return HTTP `4
 
 - `/projects` — active project index, create link, edit links, and confirmed archive action
 - `/projects/new` — lean project creation form
-- `/projects/:id` — General metadata editor with read-only status and future-section placeholders
+- `/projects/:id` — full template-aware project editor with General, Browser, Hero, Theme, Template Content, Gallery, Footer, and SEO
 - `/archive` — archived project list and restore action
 
 TanStack Query owns remote state and invalidation. React Hook Form with the shared Zod project schema owns create/edit form state and client validation.
@@ -48,6 +48,9 @@ Creation always starts at `active`. Archiving never deletes data; it changes sta
 
 Migrations remain explicit through `npm run db:migrate`. Neither application startup nor deployment creates, resets, seeds, or migrates project data.
 
-## Deferred template-editor work
+## Editor routes
 
-This foundation does not define or edit browser images, hero content, theme configuration, template content, galleries, footers, SEO, uploads, responsive assets, sequences, or isometric content. Future tickets must define strict schemas and dedicated routes for each JSONB owner rather than expanding the common metadata PATCH endpoint.
+- `GET /api/admin/projects/:id/editor` normalizes and returns all editor owners.
+- `PATCH /api/admin/projects/:id/editor` validates and atomically saves common metadata plus all JSONB owners.
+
+The basic project PATCH remains restricted to common metadata. Archived projects cannot be edited until restored. Template-specific section order is fixed and disabled sections preserve their values. See `docs/PROJECT-EDITOR.md` for ownership and deferred frontend-controlled concerns.

@@ -10,3 +10,4 @@ logs/
 .vite/
 coverage/
 *.tsbuildinfo
+var/uploads/

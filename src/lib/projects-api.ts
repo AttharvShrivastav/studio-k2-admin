@@ -3,6 +3,8 @@ import type {
   ProjectStatus,
   UpdateProjectBasicsInput,
 } from "@shared/schemas/project";
+import type { ProjectEditorInput } from "@shared/schemas/project-editor";
+import type { ImageUploadResponse, ProjectEditorData, ProjectEditorResponse, SequenceUploadResponse } from "@shared/types/project-editor";
 import type {
   ApiErrorResponse,
   ProjectBasics,
@@ -26,7 +28,7 @@ async function requestJson<T>(path: string, options?: RequestInit): Promise<T> {
     ...options,
     headers: {
       Accept: "application/json",
-      ...(options?.body ? { "Content-Type": "application/json" } : {}),
+      ...(options?.body && !(options.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
       ...options?.headers,
     },
   });
@@ -85,4 +87,28 @@ export async function restoreProject(id: string): Promise<ProjectBasics> {
     method: "POST",
   });
   return response.project;
+}
+
+export async function getProjectEditor(id: string): Promise<ProjectEditorData> {
+  const response = await requestJson<ProjectEditorResponse>(`/api/admin/projects/${id}/editor`);
+  return response.editor;
+}
+
+export async function saveProjectEditor(id: string, input: ProjectEditorInput): Promise<ProjectEditorData> {
+  const response = await requestJson<ProjectEditorResponse>(`/api/admin/projects/${id}/editor`, { method: "PATCH", body: JSON.stringify(input) });
+  return response.editor;
+}
+
+export async function uploadImages(files: File[]): Promise<ImageUploadResponse["files"]> {
+  const form = new FormData();
+  files.forEach((file) => form.append("files", file));
+  const response = await requestJson<ImageUploadResponse>("/api/admin/uploads/images", { method: "POST", body: form });
+  return response.files;
+}
+
+export async function uploadSequence(files: File[]): Promise<SequenceUploadResponse["sequence"]> {
+  const form = new FormData();
+  files.forEach((file) => form.append("frames", file));
+  const response = await requestJson<SequenceUploadResponse>("/api/admin/uploads/sequence", { method: "POST", body: form });
+  return response.sequence;
 }
