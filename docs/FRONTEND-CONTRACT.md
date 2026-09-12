@@ -171,6 +171,111 @@ Type: `TemplateFourSectionsConfig`. Canonical assembly: `HORIZON_PAVILION_CONFIG
 - `gallery`: `ProjectGalleryConfig`.
 - `navigation`: `enabled`, optional `headingLines`, renderer-facing `projects`.
 
+### Template 4 `HorizontalFrame` union addendum
+
+`TemplateFourSectionsConfig.horizontalStory.content.frames` is typed as `HorizontalFrame[]`. The exact union in `src/components/horizontal/types.ts` is:
+
+```ts
+type HorizontalFrame =
+  | EditorialFrameConfig
+  | ImageSceneFrameConfig
+  | EditorialImageFrameConfig
+  | IntrinsicImageFrameConfig;
+```
+
+The discriminator is the literal `type` field. Template 4's locked `TEMPLATE_FOUR_HORIZONTAL_CONFIG` in `src/data/horizontalTemplateFour.ts` currently instantiates the fixed sequence `editorial` → `imageScene` → `editorialImage`. It does not instantiate `intrinsicImage`. The Admin must preserve that sequence and those discriminators.
+
+#### `editorial`
+
+Exact `EditorialFrameConfig` fields:
+
+```ts
+{
+  type: 'editorial';
+  id?: string;
+  headingLines?: [string, string, string] | string[];
+  body: string;
+  shiftLineIndex?: number;
+  shiftAmountPx?: number;
+  headingLine1?: string;
+  headingLine2A?: string;
+  headingLine2B?: string;
+  headingLine3?: string;
+  headingLine4A?: string;
+  headingLine4B?: string;
+}
+```
+
+CMS-safe content fields are `headingLines`, `body`, and the optional split-heading fields `headingLine1`, `headingLine2A`, `headingLine2B`, `headingLine3`, `headingLine4A`, and `headingLine4B`. Template 4 currently uses `headingLines` and `body`. The frontend owns `type`, `id`, `shiftLineIndex`, and `shiftAmountPx`. In the locked Template 4 record, `shiftLineIndex` is `2` and `shiftAmountPx` is `58`.
+
+#### `imageScene`
+
+Exact `ImageSceneFrameConfig` fields:
+
+```ts
+{
+  type: 'imageScene';
+  id?: string;
+  interaction?: 'fullscreen' | 'centerReveal' | 'centerExpand';
+  primaryImage: string;
+  primaryImageAlt?: string;
+  primaryImageFocal?: 'left' | 'center' | 'right';
+  secondaryImage?: string;
+  secondaryImageAlt?: string;
+  secondaryImageFocal?: 'left' | 'center' | 'right';
+  preEntranceOffsetVw?: number;
+  secondaryOverlayWidthVw?: number;
+  secondaryOverlayHeightSvh?: number;
+  expandInitialWidthVw?: number;
+  expandInitialHeightSvh?: number;
+}
+```
+
+CMS-safe media fields are `primaryImage`, `primaryImageAlt`, `primaryImageFocal`, and the optional `secondaryImage`, `secondaryImageAlt`, and `secondaryImageFocal`. The frontend owns `type`, `id`, `interaction`, `preEntranceOffsetVw`, `secondaryOverlayWidthVw`, `secondaryOverlayHeightSvh`, `expandInitialWidthVw`, and `expandInitialHeightSvh`. Template 4 leaves `interaction` unset and supplies a secondary image; the shared type defines that case as `centerReveal`. Its locked values are `preEntranceOffsetVw: -18`, `secondaryOverlayWidthVw: 44`, and `secondaryOverlayHeightSvh: 36`; both expand-initial fields are omitted.
+
+#### `editorialImage`
+
+Exact `EditorialImageFrameConfig` fields:
+
+```ts
+{
+  type: 'editorialImage';
+  id?: string;
+  headingLine1: string;
+  headingLine2A: string;
+  headingLine2B: string;
+  headingLine3: string;
+  headingLine4A: string;
+  headingLine4B: string;
+  body: string;
+  image: string;
+  imageAlt?: string;
+  imageFocal?: 'left' | 'center' | 'right';
+  overlapVw?: number;
+  imageWidthVw?: number;
+  shiftAmountPx?: number;
+}
+```
+
+CMS-safe content/media fields are all six heading fragments, `body`, `image`, `imageAlt`, and `imageFocal`. The frontend owns `type`, `id`, `overlapVw`, `imageWidthVw`, and `shiftAmountPx`. Their locked Template 4 values are `30`, `100`, and `56` respectively.
+
+#### `intrinsicImage`
+
+Exact `IntrinsicImageFrameConfig` fields:
+
+```ts
+{
+  type: 'intrinsicImage';
+  id?: string;
+  src: string;
+  alt?: string;
+  focalPosition?: 'left' | 'center' | 'right';
+  caption?: string;
+}
+```
+
+The union's CMS-safe content/media fields are `src`, `alt`, `focalPosition`, and `caption`; the frontend owns `type`, `id`, and frame placement. This variant is supported by the shared renderer but is absent from the current locked Template 4 frame array, so the Admin must not add it to Template 4.
+
 ## Horizontal-story structures
 
 Templates 1 and 2 store:

@@ -326,6 +326,83 @@ const templateThreeSchema = z
   })
   .strict();
 
+const frameIdSchema = z.string().trim().min(1).max(120).optional();
+const frameFocalPositionSchema = z.enum(browserFocalPositions).optional();
+
+const editorialFrameSchema = z
+  .object({
+    type: z.literal("editorial"),
+    id: frameIdSchema,
+    headingLines: headingLinesSchema.optional(),
+    body: bodyText,
+    shiftLineIndex: z.literal(2).optional(),
+    shiftAmountPx: z.literal(58).optional(),
+    headingLine1: shortText.optional(),
+    headingLine2A: shortText.optional(),
+    headingLine2B: shortText.optional(),
+    headingLine3: shortText.optional(),
+    headingLine4A: shortText.optional(),
+    headingLine4B: shortText.optional(),
+  })
+  .strict();
+
+const imageSceneFrameSchema = z
+  .object({
+    type: z.literal("imageScene"),
+    id: frameIdSchema,
+    interaction: z.never().optional(),
+    primaryImage: mediaSourceSchema,
+    primaryImageAlt: shortText.optional(),
+    primaryImageFocal: frameFocalPositionSchema,
+    secondaryImage: mediaSourceSchema.optional(),
+    secondaryImageAlt: shortText.optional(),
+    secondaryImageFocal: frameFocalPositionSchema,
+    preEntranceOffsetVw: z.literal(-18).optional(),
+    secondaryOverlayWidthVw: z.literal(44).optional(),
+    secondaryOverlayHeightSvh: z.literal(36).optional(),
+    expandInitialWidthVw: z.never().optional(),
+    expandInitialHeightSvh: z.never().optional(),
+  })
+  .strict();
+
+const editorialImageFrameSchema = z
+  .object({
+    type: z.literal("editorialImage"),
+    id: frameIdSchema,
+    headingLine1: shortText,
+    headingLine2A: shortText,
+    headingLine2B: shortText,
+    headingLine3: shortText,
+    headingLine4A: shortText,
+    headingLine4B: shortText,
+    body: bodyText,
+    image: mediaSourceSchema,
+    imageAlt: shortText.optional(),
+    imageFocal: frameFocalPositionSchema,
+    overlapVw: z.literal(30).optional(),
+    imageWidthVw: z.literal(100).optional(),
+    shiftAmountPx: z.literal(56).optional(),
+  })
+  .strict();
+
+const intrinsicImageFrameSchema = z
+  .object({
+    type: z.literal("intrinsicImage"),
+    id: frameIdSchema,
+    src: mediaSourceSchema,
+    alt: shortText.optional(),
+    focalPosition: frameFocalPositionSchema,
+    caption: shortText.optional(),
+  })
+  .strict();
+
+export const horizontalFrameSchema = z.discriminatedUnion("type", [
+  editorialFrameSchema,
+  imageSceneFrameSchema,
+  editorialImageFrameSchema,
+  intrinsicImageFrameSchema,
+]);
+
 const templateFourSchema = z
   .object({
     template: z.literal("template-4"),
@@ -339,7 +416,7 @@ const templateFourSchema = z
               .object({
                 accentColor: cssColorSchema.optional(),
                 textColor: cssColorSchema.optional(),
-                frames: z.array(z.never()).max(0),
+                frames: z.array(horizontalFrameSchema).max(12),
                 gallery: z.null().optional(),
               })
               .strict(),
@@ -402,5 +479,6 @@ export type GalleryImage = z.infer<typeof galleryImageSchema>;
 export type GalleryConfig = z.infer<typeof galleryConfigSchema>;
 export type FooterConfig = z.infer<typeof footerConfigSchema>;
 export type SeoConfig = z.infer<typeof seoConfigSchema>;
+export type HorizontalFrame = z.infer<typeof horizontalFrameSchema>;
 export type TemplateConfig = z.infer<typeof templateConfigSchema>;
 export type ProjectEditorInput = z.infer<typeof projectEditorInputSchema>;
