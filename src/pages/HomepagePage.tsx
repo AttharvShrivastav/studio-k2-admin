@@ -107,6 +107,11 @@ type HeadingRow = {
   fields: Array<{ label?: string; name: Path<HomepageConfig> }>;
 };
 
+function headingLabel(label: string) {
+  const match = label.match(/^(.*?)(\s\([^()]+\))$/);
+  return match ? <>{match[1]}<span className="authoring-cue">{match[2]}</span></> : label;
+}
+
 function HeadingComposer({ rows }: { rows: HeadingRow[] }) {
   const { register, formState: { errors } } = useFormContext<HomepageConfig>();
 
@@ -116,14 +121,14 @@ function HeadingComposer({ rows }: { rows: HeadingRow[] }) {
       <div className="homepage-heading-rows">
         {rows.map((row) => (
           <div className="homepage-heading-row" key={row.label}>
-            <p className="homepage-heading-row-label">{row.label}</p>
+            <p className="homepage-heading-row-label">{headingLabel(row.label)}</p>
             <div className={`homepage-heading-row-fields${row.fields.length > 1 ? " is-phrase-row" : ""}`}>
               {row.fields.map((field) => {
                 const error = fieldError(errors, field.name);
                 const id = `homepage-${field.name.replaceAll(".", "-")}`;
                 return (
                   <div className="field-group" key={field.name}>
-                    {field.label && <label htmlFor={id}>{field.label}</label>}
+                    {field.label && <label htmlFor={id}>{headingLabel(field.label)}</label>}
                     <input
                       id={id}
                       aria-label={field.label ? `${row.label} — ${field.label}` : row.label}
@@ -154,11 +159,11 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [{ name: "horizontalJourney.designStatement.heading.line1" }] },
             { label: "Line 2", fields: [
               { label: "First phrase", name: "horizontalJourney.designStatement.heading.line2First" },
-              { label: "Second phrase", name: "horizontalJourney.designStatement.heading.line2Second" },
+              { label: "Second phrase (Shifts right)", name: "horizontalJourney.designStatement.heading.line2Second" },
             ] },
-            { label: "Line 3", fields: [{ name: "horizontalJourney.designStatement.heading.line3" }] },
-            { label: "Line 4", fields: [{ name: "horizontalJourney.designStatement.heading.line4" }] },
-            { label: "Line 5", fields: [{ name: "horizontalJourney.designStatement.heading.line5" }] },
+            { label: "Line 3 (Shifts right)", fields: [{ name: "horizontalJourney.designStatement.heading.line3" }] },
+            { label: "Line 4 (Shifts right)", fields: [{ name: "horizontalJourney.designStatement.heading.line4" }] },
+            { label: "Line 5 (Shifts right)", fields: [{ name: "horizontalJourney.designStatement.heading.line5" }] },
           ]} />
           <ContentCopy label="Supporting copy" name="horizontalJourney.designStatement.bodyCopy" />
           <div className="homepage-media-grid">
@@ -176,15 +181,15 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [{ name: "horizontalJourney.pauseStatement.heading.line1" }] },
             { label: "Line 2", fields: [
               { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line2First" },
-              { label: "Second phrase", name: "horizontalJourney.pauseStatement.heading.line2Second" },
+              { label: "Second phrase (Shifts right)", name: "horizontalJourney.pauseStatement.heading.line2Second" },
             ] },
             { label: "Line 3", fields: [
               { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line3First" },
               { label: "Second phrase", name: "horizontalJourney.pauseStatement.heading.line3Second" },
             ] },
-            { label: "Line 4", fields: [
-              { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line4First" },
-              { label: "Second phrase", name: "horizontalJourney.pauseStatement.heading.line4Second" },
+            { label: "Line 4 (Shifts right)", fields: [
+              { label: "First phrase (Different color)", name: "horizontalJourney.pauseStatement.heading.line4First" },
+              { label: "Second phrase (Different color)", name: "horizontalJourney.pauseStatement.heading.line4Second" },
             ] },
           ]} />
           <ContentCopy label="Supporting copy" name="horizontalJourney.pauseStatement.bodyCopy" />
@@ -198,24 +203,24 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [
               { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line1First" },
               { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line1Second" },
-              { label: "Third phrase", name: "horizontalJourney.studioStatement.heading.line1Third" },
+              { label: "Third phrase (Different color)", name: "horizontalJourney.studioStatement.heading.line1Third" },
             ] },
             { label: "Line 2", fields: [
-              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line2First" },
-              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line2Second" },
+              { label: "First phrase (Different color)", name: "horizontalJourney.studioStatement.heading.line2First" },
+              { label: "Second phrase (Animated)", name: "horizontalJourney.studioStatement.heading.line2Second" },
             ] },
             { label: "Line 3", fields: [
               { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line3First" },
-              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line3Second" },
+              { label: "Second phrase (Animated)", name: "horizontalJourney.studioStatement.heading.line3Second" },
               { label: "Third phrase", name: "horizontalJourney.studioStatement.heading.line3Third" },
             ] },
             { label: "Line 4", fields: [
               { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line4First" },
-              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line4Second" },
+              { label: "Second phrase (Animated, Different color)", name: "horizontalJourney.studioStatement.heading.line4Second" },
             ] },
             { label: "Line 5", fields: [
-              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line5First" },
-              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line5Second" },
+              { label: "First phrase (Animated, Different color)", name: "horizontalJourney.studioStatement.heading.line5First" },
+              { label: "Second phrase (Different color)", name: "horizontalJourney.studioStatement.heading.line5Second" },
               { label: "Third phrase", name: "horizontalJourney.studioStatement.heading.line5Third" },
             ] },
             { label: "Line 6", fields: [
@@ -239,12 +244,12 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line1" }] },
             { label: "Line 2", fields: [
               { label: "First phrase", name: "horizontalJourney.projectsIntroduction.heading.line2First" },
-              { label: "Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
+              { label: "Second phrase (Shifts right)", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
             ] },
             { label: "Line 3", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line3" }] },
             { label: "Line 4", fields: [
               { label: "First phrase", name: "horizontalJourney.projectsIntroduction.heading.line4First" },
-              { label: "Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line4Second" },
+              { label: "Second phrase (Shifts right)", name: "horizontalJourney.projectsIntroduction.heading.line4Second" },
             ] },
             { label: "Line 5", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line5" }] },
           ]} />

@@ -220,6 +220,11 @@ button {
   letter-spacing: 0.02em;
 }
 
+.authoring-cue {
+  color: var(--subtle);
+  font-weight: 400;
+}
+
 .field-group input {
   height: 52px;
   padding: 0 14px;
