@@ -146,6 +146,54 @@ function Narrative({ base }: { base: string }) {
   return <><LineEditor label="Heading" name={`${base}.headingLines`} /><TextArea label="Body copy" name={`${base}.bodyCopy`} /><label className="upload-button">Upload narrative images<input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(event) => void add(event.target.files)} /></label><div className="collection-list">{images.map((image, index) => <article key={image.id} className="collection-item"><img src={image.src} alt="" /><div className="collection-fields"><Field label="Alt text" name={`${base}.images.${index}.alt`} /><FocalPositionControl name={`${base}.images.${index}.focalPosition`} /><div className="compact-grid"><div className="field-group"><label>Depth</label><select {...register(path(`${base}.images.${index}.depth`))}>{narrativeDepths.map((depth) => <option key={depth}>{depth}</option>)}</select></div><Field label="Speed" name={`${base}.images.${index}.speed`} type="number" /></div></div><div className="collection-actions"><button type="button" onClick={() => move(index, -1)}>↑</button><button type="button" onClick={() => move(index, 1)}>↓</button><button type="button" onClick={() => remove(index)}>Remove</button></div></article>)}</div></>;
 }
 
+type NarrativeImage = { id: string; src: string; alt: string; focalPosition?: string; depth: "background" | "middle" | "foreground" | "rear"; speed: number };
+
+function TemplateFourNarrative({ base }: { base: string }) {
+  const { setValue } = useFormContext<ProjectEditorInput>();
+  const images = (useWatch<ProjectEditorInput>({ name: path(`${base}.images`) }) ?? []) as NarrativeImage[];
+  const [busy, setBusy] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const defaults = [{ depth: "rear", speed: 0.85 }, { depth: "rear", speed: 1.05 }] as const;
+
+  async function choose(index: number, files: FileList | null) {
+    if (!files?.[0]) return;
+    setBusy(index); setError("");
+    try {
+      const [saved] = await uploadImages([files[0]]);
+      const next = [...images];
+      next[index] = images[index]
+        ? { ...images[index], src: saved.url }
+        : { id: crypto.randomUUID(), src: saved.url, alt: "", focalPosition: "center", ...defaults[index] };
+      setValue(path(`${base}.images`), next as never, { shouldDirty: true, shouldValidate: true });
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Upload failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function remove(index: number) {
+    setValue(path(`${base}.images`), images.filter((_, itemIndex) => itemIndex !== index) as never, { shouldDirty: true, shouldValidate: true });
+  }
+
+  return <>
+    <LineEditor label="Heading" name={`${base}.headingLines`} />
+    <TextArea label="Body copy" name={`${base}.bodyCopy`} />
+    <div className="additional-media-list">{[0, 1].map((index) => {
+      const image = images[index];
+      const available = index <= images.length;
+      return <article className="additional-media-slot" key={index}>
+        <div className="media-heading"><strong>Narrative image {index + 1}</strong><div>
+          <label className={`upload-button ${available ? "" : "is-disabled"}`}>{busy === index ? "Uploading…" : image ? "Replace image" : "Upload image"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={!available || busy !== null} onChange={(event) => void choose(index, event.target.files)} /></label>
+          {image && <button type="button" className="quiet-button" onClick={() => remove(index)}>Remove</button>}
+        </div></div>
+        {image ? <div className="additional-media-body"><div className="media-preview"><img src={image.src} alt={image.alt} /></div><div className="media-fields"><Field label="Alt text" name={`${base}.images.${index}.alt`} /><FocalPositionControl name={`${base}.images.${index}.focalPosition`} /></div></div> : <p className="field-hint">{available ? "No image selected." : "Add Narrative image 1 first."}</p>}
+      </article>;
+    })}</div>
+    {error && <p className="field-error">{error}</p>}
+  </>;
+}
+
 function TemplateContent({ template }: { template: TemplateType }) {
   const base = "templateConfig.sections";
   const { register } = useFormContext<ProjectEditorInput>();
@@ -155,26 +203,26 @@ function TemplateContent({ template }: { template: TemplateType }) {
   if (template === "template-2") return <>{sectionNav}<SectionToggle label="Intro" description="Opening heading and project introduction." name={`${base}.intro.enabled`}><IntroFields base={`${base}.intro`} fixedHeading /></SectionToggle><SectionToggle label="Horizontal Story" description="A three-scene sequence combining editorial copy and imagery." name={`${base}.horizontalStory.enabled`}><HorizontalTwelve base={`${base}.horizontalStory`} /></SectionToggle><SectionToggle label="Narrative" description="Editorial copy accompanied by layered project imagery." name={`${base}.narrative.enabled`}><Narrative base={`${base}.narrative`} /></SectionToggle><SectionToggle label="Drawing" description="Project drawing and its supporting description." name={`${base}.drawing.enabled`}><DrawingTwelve base={`${base}.drawing`} /></SectionToggle></>;
   if (template === "template-3") return <>
     {sectionNav}
-    <SectionToggle label="Intro" description="Opening heading and project introduction." name={`${base}.intro.enabled`}><IntroFields base={`${base}.intro`} /></SectionToggle>
+    <SectionToggle label="Intro" description="Opening heading and project introduction." name={`${base}.intro.enabled`}><IntroFields base={`${base}.intro`} fixedHeading /></SectionToggle>
     <SequenceSection base={`${base}.bespoke`} />
     <SectionToggle label="Horizontal Story" description="Four visual scenes with editorial moments in scenes two and four." name={`${base}.horizontalStory.enabled`}>
-      <div className="compact-grid"><Field label="Accent color" name={`${base}.horizontalStory.accentColor`} /><Field label="Text color" name={`${base}.horizontalStory.textColor`} /></div>
-      <Scene number={1} title="Opening image"><ImageUrlField label="Scene image" name={`${base}.horizontalStory.frame1Image`} /></Scene>
+      <p className="section-intro">Colors follow the project Theme.</p>
+      <Scene number={1} title="Opening image"><ImageUrlField label="Opening image" name={`${base}.horizontalStory.frame1Image`} /></Scene>
       <Scene number={2} title="Editorial text and image"><AnimatedHeadingComposer paths={{ line1: `${base}.horizontalStory.frame2HeadingLine1`, line2First: `${base}.horizontalStory.frame2HeadingLine2A`, line2Second: `${base}.horizontalStory.frame2HeadingLine2B`, line3: `${base}.horizontalStory.frame2HeadingLine3`, line4First: `${base}.horizontalStory.frame2Heading4A`, line4Second: `${base}.horizontalStory.frame2Heading4B` }} /><TextArea label="Body copy" name={`${base}.horizontalStory.frame2Body`} /><ImageUrlField label="Scene image" name={`${base}.horizontalStory.frame2Image`} /></Scene>
       <Scene number={3} title="Interlude image"><ImageUrlField label="Scene image" name={`${base}.horizontalStory.frame3Image`} /></Scene>
       <Scene number={4} title="Editorial text and image"><AnimatedHeadingComposer paths={{ line1: `${base}.horizontalStory.frame4Heading1`, line2First: `${base}.horizontalStory.frame4Heading2A`, line2Second: `${base}.horizontalStory.frame4Heading2B`, line3: `${base}.horizontalStory.frame4Heading3`, line4First: `${base}.horizontalStory.frame4Heading4A`, line4Second: `${base}.horizontalStory.frame4Heading4B` }} /><TextArea label="Body copy" name={`${base}.horizontalStory.frame4Body`} /><ImageUrlField label="Scene image" name={`${base}.horizontalStory.frame4Image`} /></Scene>
     </SectionToggle>
-    <SectionToggle label="Drawing" description="Project drawing and its supporting editorial copy." name={`${base}.drawing.enabled`}><LineEditor label="Heading" name={`${base}.drawing.headingLines`} /><TextArea label="Body copy" name={`${base}.drawing.bodyCopy`} /><Field label="Accent color" name={`${base}.drawing.accentColor`} /><ImageUrlField label="Drawing image" name={`${base}.drawing.drawing`} altName={`${base}.drawing.drawingAlt`} /></SectionToggle>
+    <SectionToggle label="Drawing" description="Project drawing and its supporting editorial copy. Its color follows the project Theme." name={`${base}.drawing.enabled`}><LineEditor label="Heading" name={`${base}.drawing.headingLines`} fixedCount={3} /><TextArea label="Body copy" name={`${base}.drawing.bodyCopy`} /><ImageUrlField label="Drawing image" name={`${base}.drawing.drawing`} altName={`${base}.drawing.drawingAlt`} /></SectionToggle>
   </>;
-  return <>{sectionNav}<SectionToggle label="Intro" description="Opening heading and project introduction." name={`${base}.intro.enabled`}><IntroFields base={`${base}.intro`} /></SectionToggle><SectionToggle label="Horizontal Story" description="A fixed sequence of editorial and image scenes." name={`${base}.horizontalStory.enabled`}><p className="section-intro">Scene order and presentation are set by the website design. Edit only the content and media below.</p><TemplateFourHorizontalStory base={`${base}.horizontalStory`} /></SectionToggle><SectionToggle label="Narrative" description="Editorial copy accompanied by layered imagery." name={`${base}.narrative.enabled`}><Narrative base={`${base}.narrative`} /><MediaField label="Takeover image — optional" base={`${base}.narrative.takeoverImage`} optional /></SectionToggle><SectionToggle label="Drawing" description="Project drawing and its supporting description." name={`${base}.drawing.enabled`}><DrawingTwelve base={`${base}.drawing`} /></SectionToggle></>;
+  return <>{sectionNav}<SectionToggle label="Intro" description="Opening heading and project introduction." name={`${base}.intro.enabled`}><IntroFields base={`${base}.intro`} /></SectionToggle><SectionToggle label="Horizontal Story" description="A fixed sequence of editorial and image scenes." name={`${base}.horizontalStory.enabled`}><p className="section-intro">Scene order and presentation are set by the website design. Edit only the content and media below.</p><TemplateFourHorizontalStory base={`${base}.horizontalStory`} /></SectionToggle><SectionToggle label="Narrative" description="Editorial copy accompanied by layered imagery." name={`${base}.narrative.enabled`}><TemplateFourNarrative base={`${base}.narrative`} /><MediaField label="Takeover image — optional" base={`${base}.narrative.takeoverImage`} optional /></SectionToggle><SectionToggle label="Drawing" description="Project drawing and its supporting description." name={`${base}.drawing.enabled`}><DrawingTwelve base={`${base}.drawing`} /></SectionToggle></>;
 }
 
 function SequenceSection({ base }: { base: string }) {
-  const { register, setValue } = useFormContext<ProjectEditorInput>();
+  const { setValue } = useFormContext<ProjectEditorInput>();
   const frameCount = Number(useWatch<ProjectEditorInput>({ name: path(`${base}.frameCount`) }) ?? 0);
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState("");
   async function upload(files: FileList | null) { if (!files?.length) return; setBusy(true); setMessage(""); try { const result = await uploadSequence(Array.from(files)); setValue(path(`${base}.framePath`), result.framePath as never, { shouldDirty: true }); setValue(path(`${base}.frameCount`), result.frameCount as never, { shouldDirty: true }); setMessage(`${result.frameCount} contiguous frames validated.`); } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Sequence upload failed"); } finally { setBusy(false); } }
-  return <SectionToggle label="Bespoke / Scroll sequence" description="The established image sequence used in the bespoke project moment." name={`${base}.enabled`}><div className="compact-grid"><div className="field-group"><label>Presentation style</label><select {...register(path(`${base}.variant`))}>{["editorial","fullscreen","option-1","option-2"].map((value) => <option key={value}>{value}</option>)}</select></div><label className="toggle"><input type="checkbox" {...register(path(`${base}.showEditorialIntro`))} /><span>Show editorial intro</span></label></div><label className="upload-button">{busy ? "Validating frames…" : "Upload numbered images"}<input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => void upload(event.target.files)} /></label><Field label="Sequence image path" name={`${base}.framePath`} description="Generated automatically from the validated upload." /><div className="derived-value"><span>Number of sequence images</span><strong>{frameCount}</strong></div>{message && <p className="field-hint">{message}</p>}</SectionToggle>;
+  return <SectionToggle label="Scroll Sequence" description="The established image sequence used in this project." name={`${base}.enabled`}><div className="collection-toolbar"><div><strong>Sequence frames</strong><p>Upload a complete, consecutively numbered sequence.</p></div><label className="upload-button">{busy ? "Validating frames…" : frameCount ? "Replace sequence" : "Upload sequence"}<input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => void upload(event.target.files)} /></label></div><div className="derived-value"><span>Derived frame count</span><strong>{frameCount}</strong></div>{message && <p className="field-hint">{message}</p>}</SectionToggle>;
 }
 
 function GalleryEditor({ showTitle = true }: { showTitle?: boolean }) {
@@ -211,6 +259,13 @@ export function ProjectEditorForm({ initial, onSave, saving, serverError }: { in
     if (input.templateConfig.template === "template-1") {
       const drawing = input.templateConfig.sections.drawing;
       next = { ...next, templateConfig: { ...input.templateConfig, sections: { ...input.templateConfig.sections, drawing: { enabled: drawing.enabled, headingLines: drawing.headingLines, bodyCopy: drawing.bodyCopy, media: drawing.media } } } };
+    }
+    if (input.templateConfig.template === "template-3") {
+      const { horizontalStory, drawing } = input.templateConfig.sections;
+      next = { ...next, templateConfig: { ...input.templateConfig, sections: { ...input.templateConfig.sections,
+        horizontalStory: { ...horizontalStory, accentColor: input.themeConfig.horizontalBackgroundColor, textColor: input.themeConfig.horizontalTextColor },
+        drawing: { ...drawing, accentColor: input.themeConfig.horizontalBackgroundColor },
+      } } };
     }
     await onSave(next);
     reset({ ...next, confirmTemplateReset: false });

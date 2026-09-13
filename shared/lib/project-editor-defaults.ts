@@ -30,10 +30,10 @@ export function createTemplateConfig(template: TemplateType): TemplateConfig {
   }};
   if (template === "template-2") return { template, sections: { intro: { enabled: false, headingLines: ["", "", ""], bodyCopy: "" }, horizontalStory: horizontalTwelve(), narrative: { enabled: false, headingLines: [], bodyCopy: "", images: [] }, drawing: drawingTwelve() }};
   if (template === "template-3") return { template, sections: {
-    intro: intro(),
+    intro: { enabled: false, headingLines: ["", "", ""], bodyCopy: "" },
     bespoke: { enabled: false, module: "", variant: "editorial", showEditorialIntro: false, framePath: "", frameCount: 0 },
     horizontalStory: { enabled: false, accentColor: "", textColor: "", frame1Image: "", frame2HeadingLine1: "", frame2HeadingLine2A: "", frame2HeadingLine2B: "", frame2HeadingLine3: "", frame2Heading4A: "", frame2Heading4B: "", frame2Body: "", frame2Image: "", frame3Image: "", frame4Heading1: "", frame4Heading2A: "", frame4Heading2B: "", frame4Heading3: "", frame4Heading4A: "", frame4Heading4B: "", frame4Body: "", frame4Image: "" },
-    drawing: { enabled: false, drawing: "", drawingAlt: "", accentColor: "", headingLines: [], bodyCopy: "" },
+    drawing: { enabled: false, drawing: "", drawingAlt: "", accentColor: "", headingLines: ["", "", ""], bodyCopy: "" },
   }};
   return { template, sections: { intro: intro(), horizontalStory: { enabled: false, content: { accentColor: "", textColor: "", frames: createTemplateFourFrames(), gallery: null } }, narrative: { enabled: false, headingLines: [], bodyCopy: "", images: [] }, drawing: drawingTwelve() }};
 }

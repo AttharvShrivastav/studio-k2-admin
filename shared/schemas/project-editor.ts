@@ -294,7 +294,13 @@ const templateThreeSchema = z
     template: z.literal("template-3"),
     sections: z
       .object({
-        intro: introSchema,
+        intro: z
+          .object({
+            enabled: z.boolean(),
+            headingLines: lineTripleSchema,
+            bodyCopy: bodyText,
+          })
+          .strict(),
         bespoke: z
           .object({
             enabled: z.boolean(),
@@ -336,7 +342,7 @@ const templateThreeSchema = z
             drawing: mediaSourceSchema,
             drawingAlt: shortText.optional(),
             accentColor: cssColorSchema,
-            headingLines: headingLinesSchema,
+            headingLines: lineTripleSchema,
             bodyCopy: bodyText,
           })
           .strict(),
