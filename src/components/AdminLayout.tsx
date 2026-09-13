@@ -17,8 +17,8 @@ const navigation = [
   { label: "Dashboard", icon: GridIcon, to: "/" },
   { label: "Projects", icon: FolderIcon, to: "/projects" },
   { label: "Homepage", icon: HomeIcon },
-  { label: "Site Settings", icon: SettingsIcon },
-  { label: "Contact Enquiries", icon: MailIcon },
+  { label: "Site Settings", icon: SettingsIcon, to: "/site-settings" },
+  { label: "Contact Enquiries", icon: MailIcon, to: "/contact-enquiries" },
   { label: "Archive", icon: ArchiveIcon, to: "/archive" },
 ];
 

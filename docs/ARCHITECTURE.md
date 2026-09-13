@@ -63,3 +63,13 @@ New work should extend the existing `server/routes`, `server/db`, `shared`, and 
 Template switching preserves General, Browser, Hero, Theme, Gallery, Footer, and SEO. Meaningful existing `templateConfig` requires explicit client confirmation and a server confirmation flag before it is replaced with defaults for the selected template. Disabled sections retain their content. ProjectNavigation, animation choreography, isometric composition controls, and Template 4's undocumented horizontal-frame union remain frontend-owned.
 
 Uploads are authenticated field-level actions backed by an isolated filesystem adapter. `UPLOAD_ROOT` must point outside generated output and, in production, at persistent infrastructure. Public media is served only through generated storage keys under `/api/uploads/*`; the browser never receives an absolute filesystem path. Upload replacement/removal does not delete the old file.
+
+## Contact, settings, and template references
+
+`contact_submissions` is the source of truth for public enquiries. `POST /api/public/contact` validates and stores name, email, and message. Authenticated `/api/admin/contact-enquiries` routes list newest first, read one message, and change only `new | read` status; the Admin route is `/contact-enquiries`.
+
+`site_settings` is a singleton constrained to `id = 1`. Its only editable content is `address` and `email`. Authenticated `GET/PATCH /api/admin/site-settings` serves the Admin form at `/site-settings`; `GET /api/public/site-settings` exposes only those two values.
+
+Canonical frontend template pages use short-lived reference authorization. An authenticated `POST /api/admin/template-reference/:templateType` accepts only `template-1` through `template-4`, creates a ten-minute HMAC authorization using the existing server secret, and returns a URL under `PUBLIC_SITE_ORIGIN`. The frontend validates the signed token through `POST /api/public/template-reference/verify`; the secret and Better Auth session token never enter the URL. Missing, expired, invalid, and wrong-template authorizations resolve to the frontend NotFound experience.
+
+Migration `drizzle/0002_contact_settings.sql` creates both tables and initializes the singleton with the previously locked frontend address and email. It remains a manual deployment step through `npm run db:migrate`; startup does not apply migrations.

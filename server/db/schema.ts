@@ -111,6 +111,7 @@ export const projectTemplateType = pgEnum("project_template_type", [
   "template-3",
   "template-4",
 ]);
+export const contactSubmissionStatus = pgEnum("contact_submission_status", ["new", "read"]);
 
 type ProjectConfig = Record<string, unknown>;
 
@@ -143,4 +144,27 @@ export const projects = pgTable(
     index("projects_status_browser_order_idx").on(table.status, table.browserOrder),
     check("projects_browser_order_non_negative", sql`${table.browserOrder} >= 0`),
   ],
+);
+
+export const contactSubmissions = pgTable(
+  "contact_submissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    message: text("message").notNull(),
+    status: contactSubmissionStatus("status").default("new").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("contact_submissions_created_at_idx").on(table.createdAt)],
+);
+
+export const siteSettings = pgTable(
+  "site_settings",
+  {
+    id: integer("id").primaryKey().default(1),
+    address: text("address").notNull(),
+    email: text("email").notNull(),
+  },
+  (table) => [check("site_settings_singleton", sql`${table.id} = 1`)],
 );

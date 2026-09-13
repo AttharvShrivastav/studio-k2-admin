@@ -7,9 +7,12 @@ import path from "node:path";
 import { env } from "./lib/env.js";
 import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
+import { contactEnquiryRoutes, publicContactRoutes } from "./routes/contact.js";
 import { projectEditorRoutes } from "./routes/project-editor.js";
 import { projectRoutes } from "./routes/projects.js";
 import { publicProjectRoutes } from "./routes/public-projects.js";
+import { publicSiteSettingsRoutes, siteSettingsRoutes } from "./routes/site-settings.js";
+import { adminTemplateReferenceRoutes, publicTemplateReferenceRoutes } from "./routes/template-reference.js";
 import { uploadRoutes } from "./routes/uploads.js";
 
 export async function buildApp() {
@@ -33,7 +36,13 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: "/api" });
   await app.register(projectRoutes, { prefix: "/api/admin" });
   await app.register(projectEditorRoutes, { prefix: "/api/admin" });
+  await app.register(contactEnquiryRoutes, { prefix: "/api/admin" });
+  await app.register(siteSettingsRoutes, { prefix: "/api/admin" });
+  await app.register(adminTemplateReferenceRoutes, { prefix: "/api/admin" });
   await app.register(publicProjectRoutes, { prefix: "/api/public" });
+  await app.register(publicContactRoutes, { prefix: "/api/public" });
+  await app.register(publicSiteSettingsRoutes, { prefix: "/api/public" });
+  await app.register(publicTemplateReferenceRoutes, { prefix: "/api/public" });
   await app.register(uploadRoutes, { prefix: "/api" });
 
   const clientDirectory = path.resolve(process.cwd(), "dist/client");
