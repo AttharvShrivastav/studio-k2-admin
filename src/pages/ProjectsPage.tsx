@@ -27,7 +27,7 @@ export function ProjectsPage() {
   }
 
   return (
-    <main className="content-page">
+    <main className="content-page projects-page">
       <header className="page-header">
         <div>
           <p className="eyebrow">Projects</p>
