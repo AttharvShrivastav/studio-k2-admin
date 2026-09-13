@@ -159,7 +159,7 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [{ name: "horizontalJourney.designStatement.heading.line1" }] },
             { label: "Line 2", fields: [
               { label: "First phrase", name: "horizontalJourney.designStatement.heading.line2First" },
-              { label: "Second phrase (Shifts right)", name: "horizontalJourney.designStatement.heading.line2Second" },
+              { label: "Second phrase (Animated)", name: "horizontalJourney.designStatement.heading.line2Second" },
             ] },
             { label: "Line 3 (Shifts right)", fields: [{ name: "horizontalJourney.designStatement.heading.line3" }] },
             { label: "Line 4 (Shifts right)", fields: [{ name: "horizontalJourney.designStatement.heading.line4" }] },
@@ -181,7 +181,7 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [{ name: "horizontalJourney.pauseStatement.heading.line1" }] },
             { label: "Line 2", fields: [
               { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line2First" },
-              { label: "Second phrase (Shifts right)", name: "horizontalJourney.pauseStatement.heading.line2Second" },
+              { label: "Second phrase (Animated)", name: "horizontalJourney.pauseStatement.heading.line2Second" },
             ] },
             { label: "Line 3", fields: [
               { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line3First" },
@@ -244,7 +244,7 @@ function HorizontalJourneyEditor() {
             { label: "Line 1", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line1" }] },
             { label: "Line 2", fields: [
               { label: "First phrase", name: "horizontalJourney.projectsIntroduction.heading.line2First" },
-              { label: "Second phrase (Shifts right)", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
+              { label: "Second phrase (Animated)", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
             ] },
             { label: "Line 3", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line3" }] },
             { label: "Line 4", fields: [
