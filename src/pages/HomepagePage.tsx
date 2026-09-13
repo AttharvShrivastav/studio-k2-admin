@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext, useWatch, type Path } from "react-hook-form";
 import {
-  homepageSpotlightConfigSchema,
+  homepageConfigSchema,
   spotlightFocalPositions,
-  type HomepageSpotlightConfig,
+  type HomepageConfig,
 } from "@shared/schemas/homepage";
 import type { ProjectBasics } from "@shared/types/project";
 import { PageError, PageLoading } from "@/components/PageState";
@@ -27,10 +27,9 @@ function fieldError(errors: unknown, path: string) {
     : "";
 }
 
-function SpotlightMediaField({ slot, mobile = false }: { slot: SlotIndex; mobile?: boolean }) {
-  const { control, register, setValue, formState: { errors } } = useFormContext<HomepageSpotlightConfig>();
-  const base = `slots.${slot}.${mobile ? "mobile" : "desktop"}` as const;
-  const media = useWatch({ control, name: base });
+function HomepageMediaField({ base, mobile = false, showFocal = false }: { base: string; mobile?: boolean; showFocal?: boolean }) {
+  const { control, register, setValue, formState: { errors } } = useFormContext<HomepageConfig>();
+  const media = useWatch({ control, name: base as Path<HomepageConfig> }) as { src?: string; alt?: string; focalPosition?: "left" | "center" | "right"; mobile?: unknown } | undefined;
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const srcError = fieldError(errors, `${base}.src`);
@@ -41,11 +40,12 @@ function SpotlightMediaField({ slot, mobile = false }: { slot: SlotIndex; mobile
     setUploadError("");
     try {
       const [file] = await uploadImages([files[0]]);
-      setValue(base, {
+      setValue(base as Path<HomepageConfig>, {
+        ...media,
         src: file.url,
         alt: media?.alt ?? "",
-        focalPosition: media?.focalPosition ?? "center",
-      }, { shouldDirty: true, shouldValidate: true });
+        ...(showFocal ? { focalPosition: media?.focalPosition ?? "center" } : {}),
+      } as never, { shouldDirty: true, shouldValidate: true });
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Image upload failed.");
     } finally {
@@ -65,7 +65,7 @@ function SpotlightMediaField({ slot, mobile = false }: { slot: SlotIndex; mobile
             <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => void upload(event.target.files)} />
           </label>
           {mobile && media?.src && (
-            <button type="button" className="quiet-button" onClick={() => setValue(base, undefined, { shouldDirty: true, shouldValidate: true })}>
+            <button type="button" className="quiet-button" onClick={() => setValue(base as Path<HomepageConfig>, undefined as never, { shouldDirty: true, shouldValidate: true })}>
               Remove
             </button>
           )}
@@ -75,19 +75,19 @@ function SpotlightMediaField({ slot, mobile = false }: { slot: SlotIndex; mobile
           <>
             <div className="field-group">
               <label htmlFor={`${base}-alt`}>Alt text</label>
-              <input id={`${base}-alt`} {...register(`${base}.alt` as Path<HomepageSpotlightConfig>)} />
+              <input id={`${base}-alt`} {...register(`${base}.alt` as Path<HomepageConfig>)} />
             </div>
-            <fieldset className="spotlight-focal-field">
+            {showFocal && <fieldset className="spotlight-focal-field">
               <legend>Focal position</legend>
               <div className="spotlight-focal-options">
                 {spotlightFocalPositions.map((position) => (
                   <label key={position}>
-                    <input type="radio" value={position} {...register(`${base}.focalPosition` as Path<HomepageSpotlightConfig>)} />
+                    <input type="radio" value={position} {...register(`${base}.focalPosition` as Path<HomepageConfig>)} />
                     <span>{position[0].toUpperCase() + position.slice(1)}</span>
                   </label>
                 ))}
               </div>
-            </fieldset>
+            </fieldset>}
           </>
         )}
         {uploadError && <p className="form-error" role="alert">{uploadError}</p>}
@@ -96,11 +96,133 @@ function SpotlightMediaField({ slot, mobile = false }: { slot: SlotIndex; mobile
   );
 }
 
+function ContentField({ label, name }: { label: string; name: Path<HomepageConfig> }) {
+  const { register, formState: { errors } } = useFormContext<HomepageConfig>();
+  const error = fieldError(errors, name);
+  return <div className="field-group"><label>{label}</label><input aria-invalid={Boolean(error)} {...register(name)} />{error && <p className="field-error">{error}</p>}</div>;
+}
+
+function ContentCopy({ label, name }: { label: string; name: Path<HomepageConfig> }) {
+  const { register, formState: { errors } } = useFormContext<HomepageConfig>();
+  const error = fieldError(errors, name);
+  return <div className="field-group"><label>{label}</label><textarea rows={4} aria-invalid={Boolean(error)} {...register(name)} />{error && <p className="field-error">{error}</p>}</div>;
+}
+
+function HeadingGroup({ fields }: { fields: Array<{ label: string; name: Path<HomepageConfig> }> }) {
+  return <div className="homepage-heading-group"><p className="eyebrow">Heading</p><div className="homepage-heading-fields">{fields.map((field) => <ContentField key={field.name} {...field} />)}</div></div>;
+}
+
+function HorizontalJourneyEditor() {
+  return (
+    <section className="homepage-editor-section">
+      <header className="homepage-editor-heading"><p className="eyebrow">Horizontal journey</p><h2>Homepage story</h2><p>Content follows the established Homepage scene order and animation.</p></header>
+
+      <article className="homepage-content-block">
+        <div className="homepage-content-title"><span>01</span><div><p className="eyebrow">Opening statement</p><h3>Designing the space</h3></div></div>
+        <div className="homepage-content-fields">
+          <HeadingGroup fields={[
+            { label: "Line 1", name: "horizontalJourney.designStatement.heading.line1" },
+            { label: "Line 2 — First phrase", name: "horizontalJourney.designStatement.heading.line2First" },
+            { label: "Line 2 — Second phrase", name: "horizontalJourney.designStatement.heading.line2Second" },
+            { label: "Line 3", name: "horizontalJourney.designStatement.heading.line3" },
+            { label: "Line 4", name: "horizontalJourney.designStatement.heading.line4" },
+            { label: "Line 5", name: "horizontalJourney.designStatement.heading.line5" },
+          ]} />
+          <ContentCopy label="Supporting copy" name="horizontalJourney.designStatement.bodyCopy" />
+          <div className="homepage-media-grid">
+            <div><p className="eyebrow">Landscape image</p><HomepageMediaField base="horizontalJourney.designStatement.landscapeImage" /></div>
+            <div><p className="eyebrow">Interior image 1</p><HomepageMediaField base="horizontalJourney.designStatement.interiorImages.0" /></div>
+            <div><p className="eyebrow">Interior image 2</p><HomepageMediaField base="horizontalJourney.designStatement.interiorImages.1" /></div>
+          </div>
+        </div>
+      </article>
+
+      <article className="homepage-content-block">
+        <div className="homepage-content-title"><span>02</span><div><p className="eyebrow">Editorial statement</p><h3>Spaces that invite</h3></div></div>
+        <div className="homepage-content-fields">
+          <HeadingGroup fields={[
+            { label: "Line 1", name: "horizontalJourney.pauseStatement.heading.line1" },
+            { label: "Line 2 — First phrase", name: "horizontalJourney.pauseStatement.heading.line2First" },
+            { label: "Line 2 — Second phrase", name: "horizontalJourney.pauseStatement.heading.line2Second" },
+            { label: "Line 3 — First phrase", name: "horizontalJourney.pauseStatement.heading.line3First" },
+            { label: "Line 3 — Second phrase", name: "horizontalJourney.pauseStatement.heading.line3Second" },
+            { label: "Line 4 — First phrase", name: "horizontalJourney.pauseStatement.heading.line4First" },
+            { label: "Line 4 — Second phrase", name: "horizontalJourney.pauseStatement.heading.line4Second" },
+          ]} />
+          <ContentCopy label="Supporting copy" name="horizontalJourney.pauseStatement.bodyCopy" />
+        </div>
+      </article>
+
+      <article className="homepage-content-block">
+        <div className="homepage-content-title"><span>03</span><div><p className="eyebrow">Studio statement</p><h3>People behind the work</h3></div></div>
+        <div className="homepage-content-fields">
+          <HeadingGroup fields={[
+            { label: "Line 1 — First phrase", name: "horizontalJourney.studioStatement.heading.line1First" },
+            { label: "Line 1 — Second phrase", name: "horizontalJourney.studioStatement.heading.line1Second" },
+            { label: "Line 1 — Third phrase", name: "horizontalJourney.studioStatement.heading.line1Third" },
+            { label: "Line 2 — First phrase", name: "horizontalJourney.studioStatement.heading.line2First" },
+            { label: "Line 2 — Second phrase", name: "horizontalJourney.studioStatement.heading.line2Second" },
+            { label: "Line 3 — First phrase", name: "horizontalJourney.studioStatement.heading.line3First" },
+            { label: "Line 3 — Second phrase", name: "horizontalJourney.studioStatement.heading.line3Second" },
+            { label: "Line 3 — Third phrase", name: "horizontalJourney.studioStatement.heading.line3Third" },
+            { label: "Line 4 — First phrase", name: "horizontalJourney.studioStatement.heading.line4First" },
+            { label: "Line 4 — Second phrase", name: "horizontalJourney.studioStatement.heading.line4Second" },
+            { label: "Line 5 — First phrase", name: "horizontalJourney.studioStatement.heading.line5First" },
+            { label: "Line 5 — Second phrase", name: "horizontalJourney.studioStatement.heading.line5Second" },
+            { label: "Line 5 — Third phrase", name: "horizontalJourney.studioStatement.heading.line5Third" },
+            { label: "Line 6 — First phrase", name: "horizontalJourney.studioStatement.heading.line6First" },
+            { label: "Line 6 — Second phrase", name: "horizontalJourney.studioStatement.heading.line6Second" },
+          ]} />
+          <p className="field-hint">Phrases retain their established emphasis and reflow for the mobile composition.</p>
+          <div className="homepage-media-grid">
+            <div><p className="eyebrow">Studio image</p><HomepageMediaField base="horizontalJourney.studioStatement.mainImage" /></div>
+            <div><p className="eyebrow">Founders image</p><HomepageMediaField base="horizontalJourney.studioStatement.foundersImage" /></div>
+            <div><p className="eyebrow">Process image</p><HomepageMediaField base="horizontalJourney.studioStatement.processImage" /></div>
+          </div>
+        </div>
+      </article>
+
+      <article className="homepage-content-block">
+        <div className="homepage-content-title"><span>04</span><div><p className="eyebrow">Projects introduction</p><h3>Visions that begin</h3></div></div>
+        <div className="homepage-content-fields">
+          <HeadingGroup fields={[
+            { label: "Line 1", name: "horizontalJourney.projectsIntroduction.heading.line1" },
+            { label: "Line 2 — First phrase", name: "horizontalJourney.projectsIntroduction.heading.line2First" },
+            { label: "Line 2 — Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
+            { label: "Line 3", name: "horizontalJourney.projectsIntroduction.heading.line3" },
+            { label: "Line 4 — First phrase", name: "horizontalJourney.projectsIntroduction.heading.line4First" },
+            { label: "Line 4 — Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line4Second" },
+            { label: "Line 5", name: "horizontalJourney.projectsIntroduction.heading.line5" },
+          ]} />
+          <ContentCopy label="Supporting copy" name="horizontalJourney.projectsIntroduction.bodyCopy" />
+        </div>
+      </article>
+    </section>
+  );
+}
+
+function FrameThreeEditor() {
+  return (
+    <section className="homepage-editor-section">
+      <header className="homepage-editor-heading"><p className="eyebrow">Frame 3</p><h2>Dual image transition</h2><p>Two images shown in the established Homepage transition.</p></header>
+      <div className="frame-three-editor-grid">
+        {([0, 1] as const).map((index) => (
+          <article className="frame-three-image" key={index}>
+            <p className="eyebrow">Image {String(index + 1).padStart(2, "0")}</p>
+            <div><p className="media-label">Desktop image</p><HomepageMediaField base={`frame3.images.${index}`} showFocal /></div>
+            <div><p className="media-label">Mobile image — optional</p><p className="field-hint">Uses the desktop image when empty.</p><HomepageMediaField base={`frame3.images.${index}.mobile`} mobile showFocal /></div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function SpotlightSlot({ index, projects }: { index: SlotIndex; projects: ProjectBasics[] }) {
-  const { control, register, formState: { errors } } = useFormContext<HomepageSpotlightConfig>();
-  const projectId = useWatch({ control, name: `slots.${index}.projectId` });
+  const { control, register, formState: { errors } } = useFormContext<HomepageConfig>();
+  const projectId = useWatch({ control, name: `spotlight.slots.${index}.projectId` });
   const selectedProjectIsActive = projects.some((project) => project.id === projectId);
-  const projectError = fieldError(errors, `slots.${index}.projectId`);
+  const projectError = fieldError(errors, `spotlight.slots.${index}.projectId`);
 
   return (
     <section className="spotlight-slot">
@@ -115,7 +237,7 @@ function SpotlightSlot({ index, projects }: { index: SlotIndex; projects: Projec
       <div className="spotlight-slot-fields">
         <div className="field-group">
           <label htmlFor={`spotlight-${index}-project`}>Project</label>
-          <select id={`spotlight-${index}-project`} aria-invalid={Boolean(projectError || (projectId && !selectedProjectIsActive))} {...register(`slots.${index}.projectId`)}>
+          <select id={`spotlight-${index}-project`} aria-invalid={Boolean(projectError || (projectId && !selectedProjectIsActive))} {...register(`spotlight.slots.${index}.projectId`)}>
             <option value="">Select an active project</option>
             {projectId && !selectedProjectIsActive && <option value={projectId}>Unavailable project — choose a replacement</option>}
             {projects.map((project) => (
@@ -129,12 +251,12 @@ function SpotlightSlot({ index, projects }: { index: SlotIndex; projects: Projec
         <div className="spotlight-media-group">
           <div>
             <p className="eyebrow">Desktop Spotlight image</p>
-            <SpotlightMediaField slot={index} />
+            <HomepageMediaField base={`spotlight.slots.${index}.desktop`} showFocal />
           </div>
           <div>
             <p className="eyebrow">Mobile image — optional</p>
             <p className="field-hint">Uses the desktop Spotlight image when empty.</p>
-            <SpotlightMediaField slot={index} mobile />
+            <HomepageMediaField base={`spotlight.slots.${index}.mobile`} mobile showFocal />
           </div>
         </div>
       </div>
@@ -142,11 +264,11 @@ function SpotlightSlot({ index, projects }: { index: SlotIndex; projects: Projec
   );
 }
 
-function HomepageSpotlightForm({ initial, projects }: { initial: HomepageSpotlightConfig; projects: ProjectBasics[] }) {
+function HomepageForm({ initial, projects }: { initial: HomepageConfig; projects: ProjectBasics[] }) {
   const queryClient = useQueryClient();
   const [saved, setSaved] = useState(false);
-  const methods = useForm<HomepageSpotlightConfig>({
-    resolver: zodResolver(homepageSpotlightConfigSchema),
+  const methods = useForm<HomepageConfig>({
+    resolver: zodResolver(homepageConfigSchema),
     defaultValues: initial,
   });
   const { handleSubmit, reset, formState: { isDirty } } = methods;
@@ -154,16 +276,22 @@ function HomepageSpotlightForm({ initial, projects }: { initial: HomepageSpotlig
     mutationFn: saveHomepageSpotlight,
     onSuccess: (spotlight) => {
       queryClient.setQueryData(["homepage-spotlight"], spotlight);
-      reset(spotlight as HomepageSpotlightConfig);
+      reset(spotlight as HomepageConfig);
       setSaved(true);
     },
   });
 
-  function submit(values: HomepageSpotlightConfig) {
+  function submit(values: HomepageConfig) {
     setSaved(false);
     const normalized = {
-      slots: values.slots.map(({ mobile, ...slot }) => mobile?.src ? { ...slot, mobile } : slot),
-    } as HomepageSpotlightConfig;
+      ...values,
+      frame3: {
+        images: values.frame3.images.map(({ mobile, ...image }) => mobile?.src ? { ...image, mobile } : image),
+      },
+      spotlight: {
+        slots: values.spotlight.slots.map(({ mobile, ...slot }) => mobile?.src ? { ...slot, mobile } : slot),
+      },
+    } as HomepageConfig;
     save.mutate(normalized);
   }
 
@@ -178,12 +306,17 @@ function HomepageSpotlightForm({ initial, projects }: { initial: HomepageSpotlig
   return (
     <FormProvider {...methods}>
       <form className="homepage-spotlight-form" onSubmit={handleSubmit(submit)} noValidate>
+        <HorizontalJourneyEditor />
+        <FrameThreeEditor />
+        <section className="homepage-editor-section homepage-spotlight-section">
+          <header className="homepage-editor-heading"><p className="eyebrow">Project Spotlight</p><h2>Featured projects</h2><p>Four independently curated project moments, shown in this order.</p></header>
         {[0, 1, 2, 3].map((index) => <SpotlightSlot key={index} index={index as SlotIndex} projects={projects} />)}
+        </section>
         <div className="homepage-save-bar">
           <span className={isDirty ? "is-dirty" : ""}>{isDirty ? "Unsaved changes" : saved ? "Changes saved" : "All changes saved"}</span>
-          {save.isError && <p className="form-error" role="alert">{save.error instanceof Error ? save.error.message : "Homepage Spotlight could not be saved."}</p>}
+          {save.isError && <p className="form-error" role="alert">{save.error instanceof Error ? save.error.message : "Homepage could not be saved."}</p>}
           <button className="primary-button" type="submit" disabled={save.isPending || !isDirty}>
-            {save.isPending ? "Saving…" : "Save Spotlight"}<span aria-hidden="true">↗</span>
+            {save.isPending ? "Saving…" : "Save Homepage"}<span aria-hidden="true">↗</span>
           </button>
         </div>
       </form>
@@ -196,20 +329,20 @@ export function HomepagePage() {
   const projects = useQuery({ queryKey: ["projects", "active"], queryFn: () => listProjects("active") });
   const pending = spotlight.isPending || projects.isPending;
   const failed = spotlight.isError || projects.isError;
-  const initial = useMemo(() => spotlight.data as HomepageSpotlightConfig | undefined, [spotlight.data]);
+  const initial = useMemo(() => spotlight.data as HomepageConfig | undefined, [spotlight.data]);
 
   return (
     <main className="content-page homepage-page">
       <header className="page-header">
         <div>
           <p className="eyebrow">Homepage</p>
-          <h1>Project Spotlight</h1>
-          <p>Curate the four projects presented in the Homepage Spotlight.</p>
+          <h1>Homepage</h1>
+          <p>Edit the authored Homepage journey, Frame 3 media, and Project Spotlight.</p>
         </div>
       </header>
-      {pending && <PageLoading label="Loading Homepage Spotlight" />}
-      {failed && <PageError message="Homepage Spotlight could not be loaded." />}
-      {initial && projects.data && <HomepageSpotlightForm initial={initial} projects={projects.data} />}
+      {pending && <PageLoading label="Loading Homepage" />}
+      {failed && <PageError message="Homepage could not be loaded." />}
+      {initial && projects.data && <HomepageForm initial={initial} projects={projects.data} />}
     </main>
   );
 }

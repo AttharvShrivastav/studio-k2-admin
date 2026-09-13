@@ -14,7 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import type { SiteSettingsInput } from "../../shared/schemas/contact.js";
-import type { HomepageSpotlightConfigDraft } from "../../shared/schemas/homepage.js";
+import type { HomepageStoredConfig } from "../../shared/schemas/homepage.js";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -184,7 +184,7 @@ export const homepageConfig = pgTable(
   {
     id: integer("id").primaryKey().default(1),
     spotlightConfig: jsonb("spotlight_config")
-      .$type<HomepageSpotlightConfigDraft>()
+      .$type<HomepageStoredConfig>()
       .default({
         slots: [
           { projectId: "", desktop: { src: "", alt: "", focalPosition: "center" } },

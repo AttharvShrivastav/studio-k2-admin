@@ -1,4 +1,4 @@
-import type { HomepageSpotlightConfig } from "@shared/schemas/homepage";
+import type { HomepageConfig } from "@shared/schemas/homepage";
 import type { HomepageAdminResponse } from "@shared/types/homepage";
 import type { ApiErrorResponse } from "@shared/types/project";
 import { ApiRequestError } from "./projects-api";
@@ -26,14 +26,12 @@ async function request<T>(options?: RequestInit): Promise<T> {
 }
 
 export async function getHomepageSpotlight() {
-  return (await request<HomepageAdminResponse>()).spotlight;
+  return request<HomepageAdminResponse>();
 }
 
-export async function saveHomepageSpotlight(input: HomepageSpotlightConfig) {
-  return (
-    await request<HomepageAdminResponse>({
+export async function saveHomepageSpotlight(input: HomepageConfig) {
+  return request<HomepageAdminResponse>({
       method: "PATCH",
       body: JSON.stringify(input),
-    })
-  ).spotlight;
+    });
 }

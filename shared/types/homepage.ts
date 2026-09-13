@@ -1,9 +1,11 @@
 import type {
+  HomepageConfigDraft,
+  HomepageFrameThree,
+  HomepageHorizontalJourney,
   HomepageSpotlightConfig,
-  HomepageSpotlightConfigDraft,
 } from "../schemas/homepage.js";
 
-export type HomepageAdminResponse = { spotlight: HomepageSpotlightConfigDraft };
+export type HomepageAdminResponse = HomepageConfigDraft;
 
 export type PublicHomepageSpotlightSlot = HomepageSpotlightConfig["slots"][number] & {
   project: {
@@ -14,6 +16,8 @@ export type PublicHomepageSpotlightSlot = HomepageSpotlightConfig["slots"][numbe
 };
 
 export type PublicHomepageResponse = {
+  horizontalJourney: HomepageHorizontalJourney;
+  frame3: HomepageFrameThree;
   spotlight: {
     slots: [
       PublicHomepageSpotlightSlot,

@@ -3,10 +3,11 @@ import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
 import {
   createEmptyHomepageSpotlightConfig,
-  homepageSpotlightConfigDraftSchema,
-  homepageSpotlightConfigSchema,
-  omitEmptySpotlightMobile,
-  type HomepageSpotlightConfig,
+  createDefaultHomepageContent,
+  homepageConfigDraftSchema,
+  homepageConfigSchema,
+  omitEmptyHomepageMobile,
+  type HomepageConfig,
 } from "../../shared/schemas/homepage.js";
 import type {
   HomepageAdminResponse,
@@ -17,20 +18,24 @@ import { requireAuthentication } from "../auth/guard.js";
 import { db } from "../db/index.js";
 import { homepageConfig, projects } from "../db/schema.js";
 
-async function readSpotlightDraft() {
+async function readHomepageDraft() {
   const [row] = await db
     .select({ spotlight: homepageConfig.spotlightConfig })
     .from(homepageConfig)
     .where(eq(homepageConfig.id, 1))
     .limit(1);
 
-  if (!row) return createEmptyHomepageSpotlightConfig();
-  const parsed = homepageSpotlightConfigDraftSchema.safeParse(omitEmptySpotlightMobile(row.spotlight));
-  if (!parsed.success) throw new Error("Stored Homepage Spotlight configuration is invalid");
+  const content = createDefaultHomepageContent();
+  if (!row) return { ...content, spotlight: createEmptyHomepageSpotlightConfig() };
+  const stored = row.spotlight && typeof row.spotlight === "object" && "slots" in row.spotlight
+    ? { ...content, spotlight: row.spotlight }
+    : row.spotlight;
+  const parsed = homepageConfigDraftSchema.safeParse(omitEmptyHomepageMobile(stored));
+  if (!parsed.success) throw new Error("Stored Homepage configuration is invalid");
   return parsed.data;
 }
 
-async function validateActiveProjects(config: HomepageSpotlightConfig) {
+async function validateActiveProjects(config: HomepageConfig["spotlight"]) {
   const uniqueIds = [...new Set(config.slots.map((slot) => slot.projectId))];
   const rows = await db
     .select({ id: projects.id, title: projects.title, slug: projects.slug, status: projects.status })
@@ -54,7 +59,7 @@ function validationError(reply: FastifyReply, error: z.ZodError) {
   return reply.status(400).send({
     error: {
       code: "VALIDATION_ERROR",
-      message: "Complete all four Homepage Spotlight slots",
+      message: "Review the required Homepage fields",
       fields: z.flattenError(error).fieldErrors,
     },
   } satisfies ApiErrorResponse);
@@ -75,7 +80,7 @@ export const homepageRoutes: FastifyPluginAsync = async (app) => {
 
   app.get<{ Reply: HomepageAdminResponse | ApiErrorResponse }>("/homepage", async (_request, reply) => {
     try {
-      return { spotlight: await readSpotlightDraft() };
+      return await readHomepageDraft();
     } catch {
       return reply.status(500).send({
         error: { code: "HOMEPAGE_CONFIG_INVALID", message: "Homepage configuration could not be loaded" },
@@ -84,17 +89,13 @@ export const homepageRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.patch<{ Body: unknown; Reply: HomepageAdminResponse | ApiErrorResponse }>("/homepage", async (request, reply) => {
-    const parsed = homepageSpotlightConfigSchema.safeParse(omitEmptySpotlightMobile(request.body));
+    const parsed = homepageConfigSchema.safeParse(omitEmptyHomepageMobile(request.body));
     if (!parsed.success) return validationError(reply, parsed.error);
 
-    const active = await validateActiveProjects(parsed.data);
+    const active = await validateActiveProjects(parsed.data.spotlight);
     if (active.invalidSlots.length) return invalidProjectError(reply, active.invalidSlots);
 
-    const normalized = {
-      slots: parsed.data.slots.map(({ mobile, ...slot }) =>
-        mobile?.src ? { ...slot, mobile } : slot,
-      ),
-    } as HomepageSpotlightConfig;
+    const normalized = omitEmptyHomepageMobile(parsed.data) as HomepageConfig;
 
     const [saved] = await db
       .insert(homepageConfig)
@@ -102,7 +103,9 @@ export const homepageRoutes: FastifyPluginAsync = async (app) => {
       .onConflictDoUpdate({ target: homepageConfig.id, set: { spotlightConfig: normalized } })
       .returning({ spotlight: homepageConfig.spotlightConfig });
 
-    return { spotlight: saved.spotlight };
+    const response = homepageConfigDraftSchema.safeParse(saved.spotlight);
+    if (!response.success) throw new Error("Saved Homepage configuration is invalid");
+    return response.data;
   });
 };
 
@@ -110,21 +113,21 @@ export const publicHomepageRoutes: FastifyPluginAsync = async (app) => {
   app.get<{ Reply: PublicHomepageResponse | ApiErrorResponse }>("/homepage", async (_request, reply) => {
     let draft;
     try {
-      draft = await readSpotlightDraft();
+      draft = await readHomepageDraft();
     } catch {
       return reply.status(503).send({
         error: { code: "HOMEPAGE_CONFIG_INVALID", message: "Homepage configuration is unavailable" },
       });
     }
 
-    const parsed = homepageSpotlightConfigSchema.safeParse(draft);
+    const parsed = homepageConfigSchema.safeParse(draft);
     if (!parsed.success) {
       return reply.status(503).send({
-        error: { code: "HOMEPAGE_CONFIG_INCOMPLETE", message: "Homepage Spotlight is incomplete" },
+        error: { code: "HOMEPAGE_CONFIG_INCOMPLETE", message: "Homepage configuration is incomplete" },
       });
     }
 
-    const active = await validateActiveProjects(parsed.data);
+    const active = await validateActiveProjects(parsed.data.spotlight);
     if (active.invalidSlots.length) {
       return reply.status(503).send({
         error: { code: "HOMEPAGE_SPOTLIGHT_UNAVAILABLE", message: "A Homepage Spotlight project is unavailable" },
@@ -132,11 +135,15 @@ export const publicHomepageRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const projectById = new Map(active.projects.map((project) => [project.id, project]));
-    const slots = parsed.data.slots.map((slot) => ({
+    const slots = parsed.data.spotlight.slots.map((slot) => ({
       ...slot,
       project: projectById.get(slot.projectId)!,
     })) as PublicHomepageResponse["spotlight"]["slots"];
 
-    return { spotlight: { slots } };
+    return {
+      horizontalJourney: parsed.data.horizontalJourney,
+      frame3: parsed.data.frame3,
+      spotlight: { slots },
+    };
   });
 };
