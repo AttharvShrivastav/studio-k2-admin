@@ -14,6 +14,7 @@ import { publicProjectRoutes } from "./routes/public-projects.js";
 import { publicSiteSettingsRoutes, siteSettingsRoutes } from "./routes/site-settings.js";
 import { adminTemplateReferenceRoutes, publicTemplateReferenceRoutes } from "./routes/template-reference.js";
 import { uploadRoutes } from "./routes/uploads.js";
+import { homepageRoutes, publicHomepageRoutes } from "./routes/homepage.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -38,10 +39,12 @@ export async function buildApp() {
   await app.register(projectEditorRoutes, { prefix: "/api/admin" });
   await app.register(contactEnquiryRoutes, { prefix: "/api/admin" });
   await app.register(siteSettingsRoutes, { prefix: "/api/admin" });
+  await app.register(homepageRoutes, { prefix: "/api/admin" });
   await app.register(adminTemplateReferenceRoutes, { prefix: "/api/admin" });
   await app.register(publicProjectRoutes, { prefix: "/api/public" });
   await app.register(publicContactRoutes, { prefix: "/api/public" });
   await app.register(publicSiteSettingsRoutes, { prefix: "/api/public" });
+  await app.register(publicHomepageRoutes, { prefix: "/api/public" });
   await app.register(publicTemplateReferenceRoutes, { prefix: "/api/public" });
   await app.register(uploadRoutes, { prefix: "/api" });
 

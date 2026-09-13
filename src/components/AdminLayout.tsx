@@ -17,7 +17,7 @@ import {
 const navigation = [
   { label: "Dashboard", icon: GridIcon, to: "/" },
   { label: "Projects", icon: FolderIcon, to: "/projects" },
-  { label: "Homepage", icon: HomeIcon },
+  { label: "Homepage", icon: HomeIcon, to: "/homepage" },
   { label: "Site Settings", icon: SettingsIcon, to: "/site-settings" },
   { label: "Contact Enquiries", icon: MailIcon, to: "/contact-enquiries" },
   { label: "Archive", icon: ArchiveIcon, to: "/archive" },

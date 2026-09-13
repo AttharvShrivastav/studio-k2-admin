@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import type { SiteSettingsInput } from "../../shared/schemas/contact.js";
+import type { HomepageSpotlightConfigDraft } from "../../shared/schemas/homepage.js";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -176,4 +177,27 @@ export const siteSettings = pgTable(
       .notNull(),
   },
   (table) => [check("site_settings_singleton", sql`${table.id} = 1`)],
+);
+
+export const homepageConfig = pgTable(
+  "homepage_config",
+  {
+    id: integer("id").primaryKey().default(1),
+    spotlightConfig: jsonb("spotlight_config")
+      .$type<HomepageSpotlightConfigDraft>()
+      .default({
+        slots: [
+          { projectId: "", desktop: { src: "", alt: "", focalPosition: "center" } },
+          { projectId: "", desktop: { src: "", alt: "", focalPosition: "center" } },
+          { projectId: "", desktop: { src: "", alt: "", focalPosition: "center" } },
+          { projectId: "", desktop: { src: "", alt: "", focalPosition: "center" } },
+        ],
+      })
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [check("homepage_config_singleton", sql`${table.id} = 1`)],
 );
