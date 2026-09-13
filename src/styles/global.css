@@ -265,6 +265,83 @@ button {
   margin-top: 24px;
 }
 
+.account-layout {
+  display: grid;
+  max-width: 960px;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(360px, 1.28fr);
+  border-top: 1px solid var(--line);
+}
+
+.account-details,
+.account-password {
+  padding: clamp(28px, 4vw, 48px) 0;
+}
+
+.account-details {
+  padding-right: clamp(28px, 4vw, 52px);
+  border-right: 1px solid var(--line);
+}
+
+.account-password {
+  padding-left: clamp(28px, 4vw, 52px);
+}
+
+.account-section-heading {
+  margin-bottom: 30px;
+}
+
+.account-section-heading .eyebrow {
+  margin-bottom: 9px;
+}
+
+.account-section-heading h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.account-section-heading > p:last-child:not(.eyebrow) {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.account-details dl {
+  margin: 0;
+}
+
+.account-details dl > div {
+  padding: 17px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.account-details dt {
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+
+.account-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.account-password-submit {
+  width: min(100%, 240px);
+}
+
 .save-confirmation {
   margin: 18px 0 0;
   color: #54745a;
@@ -385,6 +462,20 @@ button {
 }
 
 @media (max-width: 800px) {
+  .account-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .account-details {
+    padding-right: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .account-password {
+    padding-left: 0;
+  }
+
   .enquiry-shell {
     grid-template-columns: 1fr;
   }

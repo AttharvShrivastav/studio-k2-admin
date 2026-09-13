@@ -9,6 +9,7 @@ import { ProjectEditPage } from "@/pages/ProjectEditPage";
 import { ProjectsPage } from "@/pages/ProjectsPage";
 import { ContactEnquiriesPage } from "@/pages/ContactEnquiriesPage";
 import { SiteSettingsPage } from "@/pages/SiteSettingsPage";
+import { AccountPage } from "@/pages/AccountPage";
 
 export function App() {
   return (
@@ -23,6 +24,7 @@ export function App() {
           <Route path="archive" element={<ArchivePage />} />
           <Route path="contact-enquiries" element={<ContactEnquiriesPage />} />
           <Route path="site-settings" element={<SiteSettingsPage />} />
+          <Route path="account" element={<AccountPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

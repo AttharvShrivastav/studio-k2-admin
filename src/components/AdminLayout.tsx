@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { queryClient } from "@/lib/query-client";
 import { Brand } from "./Brand";
 import {
+  AccountIcon,
   ArchiveIcon,
   FolderIcon,
   GridIcon,
@@ -20,6 +21,7 @@ const navigation = [
   { label: "Site Settings", icon: SettingsIcon, to: "/site-settings" },
   { label: "Contact Enquiries", icon: MailIcon, to: "/contact-enquiries" },
   { label: "Archive", icon: ArchiveIcon, to: "/archive" },
+  { label: "Account", icon: AccountIcon, to: "/account" },
 ];
 
 export function AdminLayout() {
