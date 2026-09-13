@@ -24,11 +24,11 @@ export function createTemplateConfig(template: TemplateType): TemplateConfig {
     statement: { enabled: false, lines: [] },
     story: { enabled: false, headingLines: ["", "", ""], bodyCopy: "", primaryMedia: emptyMedia(), secondMedia: emptyMedia() },
     bespoke: { enabled: false, module: "none" },
-    feature: { enabled: false, headingLines: [], bodyCopy: "", media: emptyMedia() },
+    feature: { enabled: false, headingLines: ["", "", ""], bodyCopy: "", media: emptyMedia() },
     horizontalStory: horizontalTwelve(),
-    drawing: { enabled: false, headingLines: [], bodyCopy: "", media: emptyMedia(), boxColor: "" },
+    drawing: { enabled: false, headingLines: [], bodyCopy: "", media: emptyMedia() },
   }};
-  if (template === "template-2") return { template, sections: { intro: intro(), horizontalStory: horizontalTwelve(), narrative: { enabled: false, headingLines: [], bodyCopy: "", images: [] }, drawing: drawingTwelve() }};
+  if (template === "template-2") return { template, sections: { intro: { enabled: false, headingLines: ["", "", ""], bodyCopy: "" }, horizontalStory: horizontalTwelve(), narrative: { enabled: false, headingLines: [], bodyCopy: "", images: [] }, drawing: drawingTwelve() }};
   if (template === "template-3") return { template, sections: {
     intro: intro(),
     bespoke: { enabled: false, module: "", variant: "editorial", showEditorialIntro: false, framePath: "", frameCount: 0 },

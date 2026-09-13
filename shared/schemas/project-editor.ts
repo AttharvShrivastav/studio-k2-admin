@@ -194,7 +194,24 @@ const horizontalStoryTwelveSchema = z
     frame3Heading4B: shortText.optional(),
     frame3Body: bodyText.optional(),
     frame3Media: responsiveMediaSchema.optional(),
-    trailingImages: z.null().optional(),
+    trailingImages: z
+      .array(
+        z
+          .object({
+            id: z.string().trim().min(1).max(120),
+            src: mediaSourceSchema,
+            alt: shortText,
+            focalPosition: z.enum(browserFocalPositions).optional(),
+            widthVw: z.number().positive().max(100).optional(),
+            revealDirection: z
+              .enum(["left-to-right", "right-to-left", "bottom-to-top"])
+              .optional(),
+          })
+          .strict(),
+      )
+      .max(4)
+      .nullable()
+      .optional(),
     scrollMultiplier: z.number().positive().max(20).optional(),
   })
   .strict();
@@ -229,7 +246,7 @@ const templateOneSchema = z
         feature: z
           .object({
             enabled: z.boolean(),
-            headingLines: headingLinesSchema,
+            headingLines: lineTripleSchema,
             bodyCopy: bodyText,
             media: responsiveMediaSchema,
           })
@@ -254,7 +271,9 @@ const templateTwoSchema = z
     template: z.literal("template-2"),
     sections: z
       .object({
-        intro: introSchema,
+        intro: z
+          .object({ enabled: z.boolean(), headingLines: lineTripleSchema, bodyCopy: bodyText })
+          .strict(),
         horizontalStory: horizontalStoryTwelveSchema,
         narrative: z
           .object({
