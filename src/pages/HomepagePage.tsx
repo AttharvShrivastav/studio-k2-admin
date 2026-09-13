@@ -71,21 +71,25 @@ function SpotlightMediaField({ slot, mobile = false }: { slot: SlotIndex; mobile
           )}
         </div>
         {srcError && <p className="field-error">{srcError}</p>}
-        <div className="field-group">
-          <label htmlFor={`${base}-alt`}>Alt text</label>
-          <input id={`${base}-alt`} {...register(`${base}.alt` as Path<HomepageSpotlightConfig>)} />
-        </div>
-        <fieldset className="spotlight-focal-field">
-          <legend>Focal position</legend>
-          <div className="spotlight-focal-options">
-            {spotlightFocalPositions.map((position) => (
-              <label key={position}>
-                <input type="radio" value={position} {...register(`${base}.focalPosition` as Path<HomepageSpotlightConfig>)} />
-                <span>{position[0].toUpperCase() + position.slice(1)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        {(!mobile || media?.src) && (
+          <>
+            <div className="field-group">
+              <label htmlFor={`${base}-alt`}>Alt text</label>
+              <input id={`${base}-alt`} {...register(`${base}.alt` as Path<HomepageSpotlightConfig>)} />
+            </div>
+            <fieldset className="spotlight-focal-field">
+              <legend>Focal position</legend>
+              <div className="spotlight-focal-options">
+                {spotlightFocalPositions.map((position) => (
+                  <label key={position}>
+                    <input type="radio" value={position} {...register(`${base}.focalPosition` as Path<HomepageSpotlightConfig>)} />
+                    <span>{position[0].toUpperCase() + position.slice(1)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </>
+        )}
         {uploadError && <p className="form-error" role="alert">{uploadError}</p>}
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   createEmptyHomepageSpotlightConfig,
   homepageSpotlightConfigDraftSchema,
   homepageSpotlightConfigSchema,
+  omitEmptySpotlightMobile,
   type HomepageSpotlightConfig,
 } from "../../shared/schemas/homepage.js";
 import type {
@@ -24,7 +25,7 @@ async function readSpotlightDraft() {
     .limit(1);
 
   if (!row) return createEmptyHomepageSpotlightConfig();
-  const parsed = homepageSpotlightConfigDraftSchema.safeParse(row.spotlight);
+  const parsed = homepageSpotlightConfigDraftSchema.safeParse(omitEmptySpotlightMobile(row.spotlight));
   if (!parsed.success) throw new Error("Stored Homepage Spotlight configuration is invalid");
   return parsed.data;
 }
@@ -83,7 +84,7 @@ export const homepageRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.patch<{ Body: unknown; Reply: HomepageAdminResponse | ApiErrorResponse }>("/homepage", async (request, reply) => {
-    const parsed = homepageSpotlightConfigSchema.safeParse(request.body);
+    const parsed = homepageSpotlightConfigSchema.safeParse(omitEmptySpotlightMobile(request.body));
     if (!parsed.success) return validationError(reply, parsed.error);
 
     const active = await validateActiveProjects(parsed.data);
