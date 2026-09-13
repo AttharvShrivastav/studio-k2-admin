@@ -23,7 +23,7 @@ export async function buildApp() {
   await app.register(cors, {
     origin: [...new Set([env.ADMIN_ORIGIN, env.PUBLIC_SITE_ORIGIN])],
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
 

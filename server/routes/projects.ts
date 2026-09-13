@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
 import {
@@ -9,6 +9,7 @@ import {
 import type {
   ApiErrorResponse,
   ProjectBasics,
+  ProjectDeleteResponse,
   ProjectListResponse,
   ProjectResponse,
 } from "../../shared/types/project.js";
@@ -224,6 +225,43 @@ export const projectRoutes: FastifyPluginAsync = async (app) => {
 
       if (!project) return sendNotFound(reply);
       return { project: serializeProject(project) };
+    },
+  );
+
+  app.delete<{ Params: { id: string }; Reply: ProjectDeleteResponse | ApiErrorResponse }>(
+    "/projects/:id",
+    async (request, reply) => {
+      const parsedParams = projectIdSchema.safeParse(request.params);
+      if (!parsedParams.success) return sendValidationError(reply, parsedParams.error);
+
+      const [existing] = await db
+        .select({ id: projects.id, status: projects.status })
+        .from(projects)
+        .where(eq(projects.id, parsedParams.data.id))
+        .limit(1);
+      if (!existing) return sendNotFound(reply);
+      if (existing.status !== "archived") {
+        return reply.status(409).send({
+          error: {
+            code: "PROJECT_NOT_ARCHIVED",
+            message: "Archive this project before deleting it permanently",
+          },
+        });
+      }
+
+      const [deleted] = await db
+        .delete(projects)
+        .where(and(eq(projects.id, existing.id), eq(projects.status, "archived")))
+        .returning({ id: projects.id });
+      if (!deleted) {
+        return reply.status(409).send({
+          error: {
+            code: "PROJECT_NOT_ARCHIVED",
+            message: "Archive this project before deleting it permanently",
+          },
+        });
+      }
+      return { deleted };
     },
   );
 };

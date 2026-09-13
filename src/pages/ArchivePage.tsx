@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageError, PageLoading } from "@/components/PageState";
-import { listProjects, restoreProject } from "@/lib/projects-api";
+import { deleteArchivedProject, listProjects, restoreProject } from "@/lib/projects-api";
 import { formatDate, formatTemplate } from "@/lib/project-format";
 
 export function ArchivePage() {
@@ -18,6 +18,19 @@ export function ArchivePage() {
       ]);
     },
   });
+  const deleteMutation = useMutation({
+    mutationFn: deleteArchivedProject,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["projects", "archived"] });
+    },
+  });
+
+  function confirmPermanentDelete(id: string, title: string) {
+    const confirmation = window.prompt(
+      `This permanently deletes “${title}” and cannot be undone. Uploaded files will remain on disk.\n\nType the project name exactly to continue:`,
+    );
+    if (confirmation === title) deleteMutation.mutate(id);
+  }
 
   return (
     <main className="content-page">
@@ -30,6 +43,7 @@ export function ArchivePage() {
       </header>
 
       {restoreMutation.isError && <PageError message="The project could not be restored." />}
+      {deleteMutation.isError && <PageError message="The archived project could not be permanently deleted." />}
       {projectsQuery.isPending && <PageLoading label="Loading archive" />}
       {projectsQuery.isError && <PageError message="The archive could not be loaded." />}
 
@@ -62,14 +76,24 @@ export function ArchivePage() {
                   <td data-label="Template">{formatTemplate(project.templateType)}</td>
                   <td data-label="Archived">{project.archivedAt ? formatDate(project.archivedAt) : "—"}</td>
                   <td className="table-actions">
-                    <button
-                      className="restore-button"
-                      type="button"
-                      onClick={() => restoreMutation.mutate(project.id)}
-                      disabled={restoreMutation.isPending}
-                    >
-                      Restore
-                    </button>
+                    <div className="archive-actions">
+                      <button
+                        className="restore-button"
+                        type="button"
+                        onClick={() => restoreMutation.mutate(project.id)}
+                        disabled={restoreMutation.isPending || deleteMutation.isPending}
+                      >
+                        Restore
+                      </button>
+                      <button
+                        className="text-danger-button"
+                        type="button"
+                        onClick={() => confirmPermanentDelete(project.id, project.title)}
+                        disabled={restoreMutation.isPending || deleteMutation.isPending}
+                      >
+                        Delete permanently
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

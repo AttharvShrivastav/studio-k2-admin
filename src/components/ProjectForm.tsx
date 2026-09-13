@@ -8,6 +8,7 @@ import {
 } from "@shared/schemas/project";
 import type { ProjectBasics } from "@shared/types/project";
 import { formatCategory, formatTemplate } from "@/lib/project-format";
+import { TemplateReferenceButton } from "@/components/TemplateReferenceButton";
 
 type ProjectFormProps = {
   initialProject?: ProjectBasics;
@@ -27,6 +28,7 @@ export function ProjectForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectInputSchema),
@@ -41,6 +43,7 @@ export function ProjectForm({
       browserOrder: initialProject?.browserOrder ?? 0,
     },
   });
+  const selectedTemplate = watch("templateType");
 
   return (
     <form className="project-form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -94,6 +97,7 @@ export function ProjectForm({
 
           <fieldset className="choice-fieldset">
             <legend>Template</legend>
+            <div className="choice-fieldset-reference"><TemplateReferenceButton template={selectedTemplate} /></div>
             <div className="choice-row four-up">
               {templateTypes.map((template) => (
                 <label className="choice-option" key={template}>

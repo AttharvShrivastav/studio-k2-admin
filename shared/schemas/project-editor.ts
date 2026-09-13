@@ -242,7 +242,14 @@ const templateOneSchema = z
             secondMedia: responsiveMediaSchema,
           })
           .strict(),
-        bespoke: z.object({ enabled: z.boolean(), module: z.enum(bespokeModules) }).strict(),
+        bespoke: z
+          .object({
+            enabled: z.boolean(),
+            module: z.enum(bespokeModules),
+            framePath: mediaSourceSchema.optional(),
+            frameCount: z.number().int().nonnegative().optional(),
+          })
+          .strict(),
         feature: z
           .object({
             enabled: z.boolean(),
@@ -280,9 +287,14 @@ const templateTwoSchema = z
             enabled: z.boolean(),
             headingLines: headingLinesSchema,
             bodyCopy: bodyText,
-            images: z.array(narrativeImageSchema).max(24),
+            images: z.array(narrativeImageSchema).max(2),
           })
-          .strict(),
+          .strict()
+          .superRefine((narrative, context) => {
+            if (narrative.enabled && narrative.images.length !== 2) {
+              context.addIssue({ code: "custom", path: ["images"], message: "Enabled narrative sections require exactly two images" });
+            }
+          }),
         drawing: drawingTwelveSchema,
       })
       .strict(),
@@ -324,8 +336,8 @@ const templateThreeSchema = z
             frame2Heading4A: shortText,
             frame2Heading4B: shortText,
             frame2Body: bodyText,
-            frame2Image: mediaSourceSchema,
-            frame3Image: mediaSourceSchema,
+            frame2Image: mediaSourceSchema.optional(),
+            frame3Image: mediaSourceSchema.optional(),
             frame4Heading1: shortText,
             frame4Heading2A: shortText,
             frame4Heading2B: shortText,
@@ -333,7 +345,7 @@ const templateThreeSchema = z
             frame4Heading4A: shortText,
             frame4Heading4B: shortText,
             frame4Body: bodyText,
-            frame4Image: mediaSourceSchema,
+            frame4Image: mediaSourceSchema.optional(),
           })
           .strict(),
         drawing: z

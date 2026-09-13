@@ -8,6 +8,7 @@ import type { ImageUploadResponse, ProjectEditorData, ProjectEditorResponse, Seq
 import type {
   ApiErrorResponse,
   ProjectBasics,
+  ProjectDeleteResponse,
   ProjectListResponse,
   ProjectResponse,
 } from "@shared/types/project";
@@ -87,6 +88,10 @@ export async function restoreProject(id: string): Promise<ProjectBasics> {
     method: "POST",
   });
   return response.project;
+}
+
+export async function deleteArchivedProject(id: string): Promise<void> {
+  await requestJson<ProjectDeleteResponse>(`/api/admin/projects/${id}`, { method: "DELETE" });
 }
 
 export async function getProjectEditor(id: string): Promise<ProjectEditorData> {

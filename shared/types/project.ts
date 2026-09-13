@@ -22,6 +22,7 @@ export type ProjectBasics = {
 
 export type ProjectListResponse = { projects: ProjectBasics[] };
 export type ProjectResponse = { project: ProjectBasics };
+export type ProjectDeleteResponse = { deleted: { id: string } };
 
 export type ApiErrorResponse = {
   error: {
