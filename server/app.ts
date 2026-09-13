@@ -9,6 +9,7 @@ import { authRoutes } from "./routes/auth.js";
 import { healthRoutes } from "./routes/health.js";
 import { projectEditorRoutes } from "./routes/project-editor.js";
 import { projectRoutes } from "./routes/projects.js";
+import { publicProjectRoutes } from "./routes/public-projects.js";
 import { uploadRoutes } from "./routes/uploads.js";
 
 export async function buildApp() {
@@ -20,7 +21,7 @@ export async function buildApp() {
   });
 
   await app.register(cors, {
-    origin: env.ADMIN_ORIGIN,
+    origin: [...new Set([env.ADMIN_ORIGIN, env.PUBLIC_SITE_ORIGIN])],
     credentials: true,
     methods: ["GET", "POST", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -32,6 +33,7 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: "/api" });
   await app.register(projectRoutes, { prefix: "/api/admin" });
   await app.register(projectEditorRoutes, { prefix: "/api/admin" });
+  await app.register(publicProjectRoutes, { prefix: "/api/public" });
   await app.register(uploadRoutes, { prefix: "/api" });
 
   const clientDirectory = path.resolve(process.cwd(), "dist/client");
