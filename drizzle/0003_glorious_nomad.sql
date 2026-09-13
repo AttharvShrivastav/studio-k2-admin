@@ -1,0 +1,1 @@
+ALTER TABLE "site_settings" ADD COLUMN "contact_background" jsonb DEFAULT '{"src":"/assets/Portfolio_Image.png","alt":"Studio K2 Architecture Monograph & Design Studio Atmosphere","focalPosition":"center center"}'::jsonb NOT NULL;

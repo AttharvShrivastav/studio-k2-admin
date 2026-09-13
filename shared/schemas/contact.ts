@@ -15,9 +15,19 @@ export const contactSubmissionStatusInputSchema = z.object({
   status: contactSubmissionStatusSchema,
 }).strict();
 
+export const contactBackgroundSchema = z.object({
+  src: z.string().trim().max(2_048).refine(
+    (value) => value.startsWith("/") || value.startsWith("https://") || value.startsWith("http://"),
+    "Use an uploaded path or an HTTP(S) URL",
+  ),
+  alt: z.string().trim().max(240),
+  focalPosition: z.string().trim().max(80).optional(),
+}).strict();
+
 export const siteSettingsInputSchema = z.object({
   address: normalizedText(2_000),
   email: z.string().trim().max(320).pipe(z.email()),
+  contactBackground: contactBackgroundSchema,
 }).strict();
 
 export type ContactSubmissionStatus = z.infer<typeof contactSubmissionStatusSchema>;

@@ -1507,3 +1507,37 @@ select { min-height: 45px; padding: 0 38px 0 13px; }
 .editor-note { padding: 18px; border-left: 2px solid var(--accent); color: var(--muted); background: var(--surface); line-height: 1.6; }
 @media (max-width: 900px) { .editor-layout { grid-template-columns: 1fr; } .editor-nav { position: static; flex-direction: row; overflow-x: auto; } .editor-nav button { min-width: max-content; padding: 12px; border: 0; border-bottom: 1px solid var(--line); } .editor-nav button.is-current { box-shadow: inset 0 -2px var(--accent); } .media-grid, .color-grid { grid-template-columns: 1fr; } .template-section-nav { top: 72px; } }
 @media (max-width: 640px) { .media-field, .collection-item, .additional-media-body { grid-template-columns: 1fr; } .collection-item > img { width: 100%; height: 180px; } .collection-fields, .phrase-row, .choice-row.three-up { grid-template-columns: 1fr; } .collection-actions { justify-content: flex-end; } .editor-savebar { top: 0; } .editor-subsection > header, .frame-heading { align-items: flex-start; flex-direction: column; } .line-editor-row { grid-template-columns: 1fr; } .line-editor-actions { justify-content: flex-end; } .line-add-button, .line-hint { margin-left: 0; } .heading-composer { padding: 16px; } }
+
+/* Enquiries, dashboard and contact settings */
+.settings-media-section { margin-top: 34px; padding-top: 28px; border-top: 1px solid var(--line); }
+.settings-media-section > div:first-child > p:last-child { margin: 8px 0 18px; color: var(--muted); font-size: .8rem; }
+.settings-media-card { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(240px, 1.2fr); gap: 22px; padding: 18px; border: 1px solid var(--line); }
+.settings-media-preview { display: grid; min-height: 210px; place-items: center; overflow: hidden; color: var(--muted); background: #e8e7e1; }
+.settings-media-preview img { width: 100%; height: 100%; object-fit: cover; }
+.settings-media-fields { display: flex; flex-direction: column; gap: 18px; }
+.enquiry-filter { display: inline-flex; gap: 3px; margin: -24px 0 24px; padding: 3px; border: 1px solid var(--line); background: var(--surface); }
+.enquiry-filter button { min-width: 82px; padding: 9px 14px; border: 0; color: var(--muted); background: transparent; font: inherit; font-size: .72rem; cursor: pointer; }
+.enquiry-filter button.is-active { color: var(--ink); background: #e9e8e2; }
+.enquiry-list-item.is-unread { background: #f8f7f2; box-shadow: inset 2px 0 0 var(--accent); }
+.enquiry-list-item.is-unread strong { font-weight: 700; }
+.enquiry-actions { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex-wrap: wrap; }
+.compact-empty { min-height: 220px; }
+.enquiry-dashboard-header { margin-bottom: clamp(42px, 6vw, 72px); }
+.unread-summary { min-width: 180px; padding: 18px 0 14px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+.unread-summary span { display: block; color: var(--muted); font-size: .72rem; }
+.unread-summary strong { display: block; margin-top: 8px; font-size: 2.4rem; font-weight: 400; }
+.dashboard-enquiries { max-width: 980px; }
+.dashboard-enquiries .section-heading-row a { color: var(--ink); font-size: .75rem; font-weight: 600; }
+.dashboard-enquiry-list { border-top: 1px solid var(--ink); }
+.dashboard-enquiry { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 20px; align-items: start; padding: 20px 4px; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+.dashboard-enquiry.is-unread { padding-left: 14px; box-shadow: inset 2px 0 0 var(--accent); background: #f8f7f2; }
+.dashboard-enquiry strong, .dashboard-enquiry span { display: block; }
+.dashboard-enquiry > div > span, .dashboard-enquiry time { margin-top: 4px; color: var(--muted); font-size: .72rem; }
+.dashboard-enquiry p { max-width: 650px; margin: 10px 0 0; color: #555852; font-size: .8rem; line-height: 1.5; }
+.dashboard-enquiry time { margin-top: 0; white-space: nowrap; }
+.dashboard-empty { padding: 34px 4px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); color: var(--muted); }
+@media (max-width: 800px) {
+  .settings-media-card { grid-template-columns: 1fr; }
+  .dashboard-enquiry { grid-template-columns: 64px minmax(0, 1fr); }
+  .dashboard-enquiry time { grid-column: 2; }
+}

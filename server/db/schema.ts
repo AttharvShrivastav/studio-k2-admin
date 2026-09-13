@@ -13,6 +13,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import type { SiteSettingsInput } from "../../shared/schemas/contact.js";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -165,6 +166,14 @@ export const siteSettings = pgTable(
     id: integer("id").primaryKey().default(1),
     address: text("address").notNull(),
     email: text("email").notNull(),
+    contactBackground: jsonb("contact_background")
+      .$type<SiteSettingsInput["contactBackground"]>()
+      .default({
+        src: "/assets/Portfolio_Image.png",
+        alt: "Studio K2 Architecture Monograph & Design Studio Atmosphere",
+        focalPosition: "center center",
+      })
+      .notNull(),
   },
   (table) => [check("site_settings_singleton", sql`${table.id} = 1`)],
 );

@@ -7,6 +7,7 @@ import {
 } from "../../shared/schemas/contact.js";
 import type {
   ContactSubmissionCreatedResponse,
+  ContactSubmissionDeleteResponse,
   ContactSubmissionListResponse,
   ContactSubmissionResponse,
 } from "../../shared/types/contact.js";
@@ -97,6 +98,17 @@ export const contactEnquiryRoutes: FastifyPluginAsync = async (app) => {
       const [row] = await db.update(contactSubmissions).set(input.data).where(eq(contactSubmissions.id, params.data.id)).returning();
       if (!row) return notFound(reply);
       return { enquiry: serializeEnquiry(row) };
+    },
+  );
+
+  app.delete<{ Params: { id: string }; Reply: ContactSubmissionDeleteResponse | ApiErrorResponse }>(
+    "/contact-enquiries/:id",
+    async (request, reply) => {
+      const params = enquiryIdSchema.safeParse(request.params);
+      if (!params.success) return validationError(reply, params.error);
+      const [deleted] = await db.delete(contactSubmissions).where(eq(contactSubmissions.id, params.data.id)).returning({ id: contactSubmissions.id });
+      if (!deleted) return notFound(reply);
+      return { deleted };
     },
   );
 };

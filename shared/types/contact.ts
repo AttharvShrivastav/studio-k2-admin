@@ -14,6 +14,11 @@ export type ContactSubmissionListItem = Omit<ContactSubmission, "message"> & {
 };
 export type ContactSubmissionListResponse = { enquiries: ContactSubmissionListItem[] };
 export type ContactSubmissionResponse = { enquiry: ContactSubmission };
+export type ContactSubmissionDeleteResponse = { deleted: { id: string } };
 export type ContactSubmissionCreatedResponse = { success: true };
-export type PublicSiteSettings = { address: string; email: string };
+export type PublicSiteSettings = {
+  address: string;
+  email: string;
+  contactBackground: { src: string; alt: string; focalPosition?: string };
+};
 export type SiteSettingsResponse = { settings: PublicSiteSettings };

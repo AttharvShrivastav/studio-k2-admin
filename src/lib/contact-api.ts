@@ -1,6 +1,7 @@
 import type { ContactSubmissionStatus, SiteSettingsInput } from "@shared/schemas/contact";
 import type {
   ContactSubmission,
+  ContactSubmissionDeleteResponse,
   ContactSubmissionListItem,
   ContactSubmissionListResponse,
   ContactSubmissionResponse,
@@ -43,6 +44,10 @@ export async function setEnquiryStatus(id: string, status: ContactSubmissionStat
     method: "PATCH",
     body: JSON.stringify({ status }),
   })).enquiry;
+}
+
+export async function deleteEnquiry(id: string): Promise<void> {
+  await requestJson<ContactSubmissionDeleteResponse>(`/api/admin/contact-enquiries/${id}`, { method: "DELETE" });
 }
 
 export async function getSiteSettings(): Promise<PublicSiteSettings> {

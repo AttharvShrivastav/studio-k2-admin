@@ -9,7 +9,7 @@ import { db } from "../db/index.js";
 import { siteSettings } from "../db/schema.js";
 
 async function readSettings() {
-  const [settings] = await db.select({ address: siteSettings.address, email: siteSettings.email }).from(siteSettings).where(eq(siteSettings.id, 1)).limit(1);
+  const [settings] = await db.select({ address: siteSettings.address, email: siteSettings.email, contactBackground: siteSettings.contactBackground }).from(siteSettings).where(eq(siteSettings.id, 1)).limit(1);
   return settings;
 }
 
@@ -41,7 +41,7 @@ export const siteSettingsRoutes: FastifyPluginAsync = async (app) => {
         },
       });
     }
-    const [settings] = await db.insert(siteSettings).values({ id: 1, ...parsed.data }).onConflictDoUpdate({ target: siteSettings.id, set: parsed.data }).returning({ address: siteSettings.address, email: siteSettings.email });
+    const [settings] = await db.insert(siteSettings).values({ id: 1, ...parsed.data }).onConflictDoUpdate({ target: siteSettings.id, set: parsed.data }).returning({ address: siteSettings.address, email: siteSettings.email, contactBackground: siteSettings.contactBackground });
     return { settings };
   });
 };

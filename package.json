@@ -16,6 +16,7 @@
     "check": "npm run lint && npm run typecheck",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "projects:import-current": "tsx server/scripts/import-current-projects.ts",
     "admin:create": "tsx server/auth/create-admin.ts"
   },
   "dependencies": {

@@ -1,65 +1,39 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { PageError, PageLoading } from "@/components/PageState";
 import { authClient } from "@/lib/auth-client";
-import { getHealth } from "@/lib/api";
+import { listEnquiries } from "@/lib/contact-api";
 
-const plannedModules = [
-  { number: "01", title: "Projects", detail: "Project entries and case studies" },
-  { number: "02", title: "Homepage", detail: "Curated landing-page content" },
-  { number: "03", title: "Site Settings", detail: "Shared website information" },
-  { number: "04", title: "Enquiries", detail: "Incoming contact submissions" },
-];
+function formatReceived(value: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+}
 
 export function DashboardPage() {
   const { data: session } = authClient.useSession();
-  const health = useQuery({ queryKey: ["health"], queryFn: getHealth });
+  const enquiries = useQuery({ queryKey: ["contact-enquiries"], queryFn: listEnquiries });
   const firstName = session?.user.name?.split(" ")[0] || "there";
+  const unreadCount = enquiries.data?.filter((item) => item.status === "new").length ?? 0;
+  const recent = enquiries.data?.slice(0, 5) ?? [];
 
   return (
     <main className="dashboard-page">
-      <header className="dashboard-header">
-        <div>
-          <p className="eyebrow">Dashboard</p>
-          <h1>Good to see you, {firstName}.</h1>
-          <p>The Studio K2 administration foundation is ready.</p>
-        </div>
-        <div className="system-status" aria-live="polite">
-          <span className={`status-dot ${health.isSuccess ? "is-online" : ""}`} />
-          <span>{health.isSuccess ? "Systems operational" : health.isError ? "API unavailable" : "Checking systems"}</span>
-        </div>
+      <header className="dashboard-header enquiry-dashboard-header">
+        <div><p className="eyebrow">Dashboard</p><h1>Good to see you, {firstName}.</h1><p>Your latest Studio K2 enquiries are below.</p></div>
+        <div className="unread-summary"><span>Unread enquiries</span><strong>{unreadCount}</strong></div>
       </header>
 
-      <section className="foundation-note">
-        <div className="foundation-index">00</div>
-        <div>
-          <p className="eyebrow">Foundation complete</p>
-          <h2>Your content workspace is ready for its first module.</h2>
-          <p>
-            Authentication, database connectivity, and the application shell are in place.
-            Content tools will be introduced one at a time as their schemas are approved.
-          </p>
-        </div>
-      </section>
-
-      <section className="module-section" aria-labelledby="module-heading">
-        <div className="section-heading-row">
-          <div>
-            <p className="eyebrow">Planned workspace</p>
-            <h2 id="module-heading">Content areas</h2>
-          </div>
-          <span>Not yet enabled</span>
-        </div>
-        <div className="module-grid">
-          {plannedModules.map((module) => (
-            <article className="module-row" key={module.number}>
-              <span>{module.number}</span>
-              <div>
-                <h3>{module.title}</h3>
-                <p>{module.detail}</p>
-              </div>
-              <span className="module-mark" aria-hidden="true">—</span>
-            </article>
-          ))}
-        </div>
+      <section className="dashboard-enquiries" aria-labelledby="recent-enquiries-heading">
+        <div className="section-heading-row"><div><p className="eyebrow">Inbox</p><h2 id="recent-enquiries-heading">Recent enquiries</h2></div><Link to="/contact-enquiries">View all enquiries →</Link></div>
+        {enquiries.isPending && <PageLoading label="Loading recent enquiries" />}
+        {enquiries.isError && <PageError message="Recent enquiries could not be loaded." />}
+        {enquiries.isSuccess && recent.length === 0 && <div className="dashboard-empty"><p>No enquiries yet.</p></div>}
+        {recent.length > 0 && <div className="dashboard-enquiry-list">{recent.map((item) => (
+          <Link className={`dashboard-enquiry${item.status === "new" ? " is-unread" : ""}`} to={`/contact-enquiries?enquiry=${item.id}`} key={item.id}>
+            <span className={`enquiry-status${item.status === "new" ? " is-new" : ""}`}>{item.status === "new" ? "Unread" : "Read"}</span>
+            <div><strong>{item.name}</strong><span>{item.email}</span><p>{item.messagePreview}</p></div>
+            <time dateTime={item.createdAt}>{formatReceived(item.createdAt)}</time>
+          </Link>
+        ))}</div>}
       </section>
     </main>
   );
