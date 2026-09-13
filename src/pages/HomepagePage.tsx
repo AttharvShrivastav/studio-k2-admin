@@ -96,20 +96,50 @@ function HomepageMediaField({ base, mobile = false, showFocal = false }: { base:
   );
 }
 
-function ContentField({ label, name }: { label: string; name: Path<HomepageConfig> }) {
-  const { register, formState: { errors } } = useFormContext<HomepageConfig>();
-  const error = fieldError(errors, name);
-  return <div className="field-group"><label>{label}</label><input aria-invalid={Boolean(error)} {...register(name)} />{error && <p className="field-error">{error}</p>}</div>;
-}
-
 function ContentCopy({ label, name }: { label: string; name: Path<HomepageConfig> }) {
   const { register, formState: { errors } } = useFormContext<HomepageConfig>();
   const error = fieldError(errors, name);
   return <div className="field-group"><label>{label}</label><textarea rows={4} aria-invalid={Boolean(error)} {...register(name)} />{error && <p className="field-error">{error}</p>}</div>;
 }
 
-function HeadingGroup({ fields }: { fields: Array<{ label: string; name: Path<HomepageConfig> }> }) {
-  return <div className="homepage-heading-group"><p className="eyebrow">Heading</p><div className="homepage-heading-fields">{fields.map((field) => <ContentField key={field.name} {...field} />)}</div></div>;
+type HeadingRow = {
+  label: string;
+  fields: Array<{ label?: string; name: Path<HomepageConfig> }>;
+};
+
+function HeadingComposer({ rows }: { rows: HeadingRow[] }) {
+  const { register, formState: { errors } } = useFormContext<HomepageConfig>();
+
+  return (
+    <fieldset className="homepage-heading-composer">
+      <legend>Heading</legend>
+      <div className="homepage-heading-rows">
+        {rows.map((row) => (
+          <div className="homepage-heading-row" key={row.label}>
+            <p className="homepage-heading-row-label">{row.label}</p>
+            <div className={`homepage-heading-row-fields${row.fields.length > 1 ? " is-phrase-row" : ""}`}>
+              {row.fields.map((field) => {
+                const error = fieldError(errors, field.name);
+                const id = `homepage-${field.name.replaceAll(".", "-")}`;
+                return (
+                  <div className="field-group" key={field.name}>
+                    {field.label && <label htmlFor={id}>{field.label}</label>}
+                    <input
+                      id={id}
+                      aria-label={field.label ? `${row.label} — ${field.label}` : row.label}
+                      aria-invalid={Boolean(error)}
+                      {...register(field.name)}
+                    />
+                    {error && <p className="field-error">{error}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </fieldset>
+  );
 }
 
 function HorizontalJourneyEditor() {
@@ -120,13 +150,15 @@ function HorizontalJourneyEditor() {
       <article className="homepage-content-block">
         <div className="homepage-content-title"><span>01</span><div><p className="eyebrow">Opening statement</p><h3>Designing the space</h3></div></div>
         <div className="homepage-content-fields">
-          <HeadingGroup fields={[
-            { label: "Line 1", name: "horizontalJourney.designStatement.heading.line1" },
-            { label: "Line 2 — First phrase", name: "horizontalJourney.designStatement.heading.line2First" },
-            { label: "Line 2 — Second phrase", name: "horizontalJourney.designStatement.heading.line2Second" },
-            { label: "Line 3", name: "horizontalJourney.designStatement.heading.line3" },
-            { label: "Line 4", name: "horizontalJourney.designStatement.heading.line4" },
-            { label: "Line 5", name: "horizontalJourney.designStatement.heading.line5" },
+          <HeadingComposer rows={[
+            { label: "Line 1", fields: [{ name: "horizontalJourney.designStatement.heading.line1" }] },
+            { label: "Line 2", fields: [
+              { label: "First phrase", name: "horizontalJourney.designStatement.heading.line2First" },
+              { label: "Second phrase", name: "horizontalJourney.designStatement.heading.line2Second" },
+            ] },
+            { label: "Line 3", fields: [{ name: "horizontalJourney.designStatement.heading.line3" }] },
+            { label: "Line 4", fields: [{ name: "horizontalJourney.designStatement.heading.line4" }] },
+            { label: "Line 5", fields: [{ name: "horizontalJourney.designStatement.heading.line5" }] },
           ]} />
           <ContentCopy label="Supporting copy" name="horizontalJourney.designStatement.bodyCopy" />
           <div className="homepage-media-grid">
@@ -140,14 +172,20 @@ function HorizontalJourneyEditor() {
       <article className="homepage-content-block">
         <div className="homepage-content-title"><span>02</span><div><p className="eyebrow">Editorial statement</p><h3>Spaces that invite</h3></div></div>
         <div className="homepage-content-fields">
-          <HeadingGroup fields={[
-            { label: "Line 1", name: "horizontalJourney.pauseStatement.heading.line1" },
-            { label: "Line 2 — First phrase", name: "horizontalJourney.pauseStatement.heading.line2First" },
-            { label: "Line 2 — Second phrase", name: "horizontalJourney.pauseStatement.heading.line2Second" },
-            { label: "Line 3 — First phrase", name: "horizontalJourney.pauseStatement.heading.line3First" },
-            { label: "Line 3 — Second phrase", name: "horizontalJourney.pauseStatement.heading.line3Second" },
-            { label: "Line 4 — First phrase", name: "horizontalJourney.pauseStatement.heading.line4First" },
-            { label: "Line 4 — Second phrase", name: "horizontalJourney.pauseStatement.heading.line4Second" },
+          <HeadingComposer rows={[
+            { label: "Line 1", fields: [{ name: "horizontalJourney.pauseStatement.heading.line1" }] },
+            { label: "Line 2", fields: [
+              { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line2First" },
+              { label: "Second phrase", name: "horizontalJourney.pauseStatement.heading.line2Second" },
+            ] },
+            { label: "Line 3", fields: [
+              { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line3First" },
+              { label: "Second phrase", name: "horizontalJourney.pauseStatement.heading.line3Second" },
+            ] },
+            { label: "Line 4", fields: [
+              { label: "First phrase", name: "horizontalJourney.pauseStatement.heading.line4First" },
+              { label: "Second phrase", name: "horizontalJourney.pauseStatement.heading.line4Second" },
+            ] },
           ]} />
           <ContentCopy label="Supporting copy" name="horizontalJourney.pauseStatement.bodyCopy" />
         </div>
@@ -156,22 +194,34 @@ function HorizontalJourneyEditor() {
       <article className="homepage-content-block">
         <div className="homepage-content-title"><span>03</span><div><p className="eyebrow">Studio statement</p><h3>People behind the work</h3></div></div>
         <div className="homepage-content-fields">
-          <HeadingGroup fields={[
-            { label: "Line 1 — First phrase", name: "horizontalJourney.studioStatement.heading.line1First" },
-            { label: "Line 1 — Second phrase", name: "horizontalJourney.studioStatement.heading.line1Second" },
-            { label: "Line 1 — Third phrase", name: "horizontalJourney.studioStatement.heading.line1Third" },
-            { label: "Line 2 — First phrase", name: "horizontalJourney.studioStatement.heading.line2First" },
-            { label: "Line 2 — Second phrase", name: "horizontalJourney.studioStatement.heading.line2Second" },
-            { label: "Line 3 — First phrase", name: "horizontalJourney.studioStatement.heading.line3First" },
-            { label: "Line 3 — Second phrase", name: "horizontalJourney.studioStatement.heading.line3Second" },
-            { label: "Line 3 — Third phrase", name: "horizontalJourney.studioStatement.heading.line3Third" },
-            { label: "Line 4 — First phrase", name: "horizontalJourney.studioStatement.heading.line4First" },
-            { label: "Line 4 — Second phrase", name: "horizontalJourney.studioStatement.heading.line4Second" },
-            { label: "Line 5 — First phrase", name: "horizontalJourney.studioStatement.heading.line5First" },
-            { label: "Line 5 — Second phrase", name: "horizontalJourney.studioStatement.heading.line5Second" },
-            { label: "Line 5 — Third phrase", name: "horizontalJourney.studioStatement.heading.line5Third" },
-            { label: "Line 6 — First phrase", name: "horizontalJourney.studioStatement.heading.line6First" },
-            { label: "Line 6 — Second phrase", name: "horizontalJourney.studioStatement.heading.line6Second" },
+          <HeadingComposer rows={[
+            { label: "Line 1", fields: [
+              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line1First" },
+              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line1Second" },
+              { label: "Third phrase", name: "horizontalJourney.studioStatement.heading.line1Third" },
+            ] },
+            { label: "Line 2", fields: [
+              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line2First" },
+              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line2Second" },
+            ] },
+            { label: "Line 3", fields: [
+              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line3First" },
+              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line3Second" },
+              { label: "Third phrase", name: "horizontalJourney.studioStatement.heading.line3Third" },
+            ] },
+            { label: "Line 4", fields: [
+              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line4First" },
+              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line4Second" },
+            ] },
+            { label: "Line 5", fields: [
+              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line5First" },
+              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line5Second" },
+              { label: "Third phrase", name: "horizontalJourney.studioStatement.heading.line5Third" },
+            ] },
+            { label: "Line 6", fields: [
+              { label: "First phrase", name: "horizontalJourney.studioStatement.heading.line6First" },
+              { label: "Second phrase", name: "horizontalJourney.studioStatement.heading.line6Second" },
+            ] },
           ]} />
           <p className="field-hint">Phrases retain their established emphasis and reflow for the mobile composition.</p>
           <div className="homepage-media-grid">
@@ -185,14 +235,18 @@ function HorizontalJourneyEditor() {
       <article className="homepage-content-block">
         <div className="homepage-content-title"><span>04</span><div><p className="eyebrow">Projects introduction</p><h3>Visions that begin</h3></div></div>
         <div className="homepage-content-fields">
-          <HeadingGroup fields={[
-            { label: "Line 1", name: "horizontalJourney.projectsIntroduction.heading.line1" },
-            { label: "Line 2 — First phrase", name: "horizontalJourney.projectsIntroduction.heading.line2First" },
-            { label: "Line 2 — Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
-            { label: "Line 3", name: "horizontalJourney.projectsIntroduction.heading.line3" },
-            { label: "Line 4 — First phrase", name: "horizontalJourney.projectsIntroduction.heading.line4First" },
-            { label: "Line 4 — Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line4Second" },
-            { label: "Line 5", name: "horizontalJourney.projectsIntroduction.heading.line5" },
+          <HeadingComposer rows={[
+            { label: "Line 1", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line1" }] },
+            { label: "Line 2", fields: [
+              { label: "First phrase", name: "horizontalJourney.projectsIntroduction.heading.line2First" },
+              { label: "Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line2Second" },
+            ] },
+            { label: "Line 3", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line3" }] },
+            { label: "Line 4", fields: [
+              { label: "First phrase", name: "horizontalJourney.projectsIntroduction.heading.line4First" },
+              { label: "Second phrase", name: "horizontalJourney.projectsIntroduction.heading.line4Second" },
+            ] },
+            { label: "Line 5", fields: [{ name: "horizontalJourney.projectsIntroduction.heading.line5" }] },
           ]} />
           <ContentCopy label="Supporting copy" name="horizontalJourney.projectsIntroduction.bodyCopy" />
         </div>

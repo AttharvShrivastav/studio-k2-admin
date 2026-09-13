@@ -427,16 +427,66 @@ button {
   gap: 30px;
 }
 
-.homepage-heading-group > .eyebrow,
 .homepage-media-grid .eyebrow {
   margin-bottom: 12px;
   color: var(--muted);
 }
 
-.homepage-heading-fields {
+.homepage-heading-composer {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.homepage-heading-composer > legend {
+  margin-bottom: 17px;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.homepage-heading-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.homepage-heading-row-label {
+  margin: 0 0 7px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+}
+
+.homepage-heading-row-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.homepage-heading-row-fields.is-phrase-row {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.homepage-heading-row-fields .field-group {
+  min-width: 0;
+  gap: 6px;
+}
+
+.homepage-heading-row-fields .field-group > label {
+  color: var(--subtle);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.homepage-heading-row-fields input {
+  min-height: 45px;
 }
 
 .homepage-media-grid {
@@ -1754,8 +1804,11 @@ button {
     width: 100%;
   }
 
-  .homepage-heading-fields,
   .homepage-media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .homepage-heading-row-fields.is-phrase-row {
     grid-template-columns: 1fr;
   }
 
