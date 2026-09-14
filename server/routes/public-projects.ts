@@ -22,6 +22,7 @@ import {
   themeConfigSchema,
 } from "../../shared/schemas/project-editor.js";
 import type { ApiErrorResponse } from "../../shared/types/project.js";
+import { preserveSpecialBespokeModule } from "../../shared/lib/special-bespoke-modules.js";
 import type {
   PublicProject,
   PublicProjectListResponse,
@@ -91,6 +92,10 @@ function serializePublicProject(row: Pick<PublicProjectRow, keyof typeof selecti
   if (!parsed.success) throw new Error("Stored project configuration is invalid");
 
   const data = parsed.data;
+  const templateConfig = preserveSpecialBespokeModule(
+    data.templateConfig,
+    data.general.slug,
+  );
   const result: PublicProject = {
     id: row.id,
     title: data.general.title,
@@ -104,7 +109,7 @@ function serializePublicProject(row: Pick<PublicProjectRow, keyof typeof selecti
     browserImage: data.browserImage,
     hero: data.hero,
     themeConfig: data.themeConfig,
-    templateConfig: data.templateConfig,
+    templateConfig,
     galleryConfig: data.galleryConfig,
     footerConfig: data.footerConfig,
     seoConfig: data.seoConfig,
