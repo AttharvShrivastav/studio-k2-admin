@@ -125,10 +125,10 @@ Type: `TemplateOneSectionsConfig`. Fixed order: Hero → Statement → Story →
 - `statement`: `enabled`, `lines: string[]`.
 - `story`: `enabled`, `headingLines: [string, string, string]`, `bodyCopy`, `primaryMedia`, `secondMedia`.
 - `bespoke`: `enabled`, `module: TemplateOneBespokeModule`.
-- `feature`: `enabled`, `headingLines`, `bodyCopy`, `media`.
-- `horizontalStory`: Template 1/2 structure below.
-- `drawing`: `enabled`, `headingLines`, `bodyCopy`, `media`, optional `boxColor`.
-- `gallery`: `ProjectGalleryConfig`.
+- `feature`: `enabled`, `headingLines: [string, string, string]`, `bodyCopy`, `media`. Its three entries are fixed authored lines; Line 3 retains the existing independent motion.
+- `horizontalStory`: Template 1/2 structure below. Scene 3 exposes all six existing animated text fragments separately. `trailingImages` accepts zero to four explicit client images after `frame3Media`.
+- `drawing`: `enabled`, `headingLines`, `bodyCopy`, `media`. Its visual accent/background comes from `ProjectThemeConfig.horizontalBackgroundColor`; there is no project-authored `boxColor` field.
+- `gallery`: `TemplateGalleryConfig`; the heading is the shared frontend default and is not CMS-authored.
 - `navigation`: `enabled`, optional `headingLines`, renderer-facing `projects: NavProjectItem[]`.
 
 `TemplateOneBespokeModule` currently allows `isometric | exploded-isometric | tower-expansion | scroll-video | scroll-video-option-1 | scroll-video-option-2 | none`.
@@ -138,11 +138,11 @@ Type: `TemplateOneSectionsConfig`. Fixed order: Hero → Statement → Story →
 Type: `TemplateTwoSectionsConfig`. Fixed order: Hero → Intro → Horizontal Story → Narrative → Drawing → Gallery → Navigation.
 
 - `hero`: shared Hero fields.
-- `intro`: `enabled`, `headingLines`, `bodyCopy`.
-- `horizontalStory`: Template 1/2 structure below.
+- `intro`: `enabled`, `headingLines: [string, string, string]`, `bodyCopy`. Its three entries are fixed authored lines; Line 3 retains the existing independent motion.
+- `horizontalStory`: Template 1/2 structure below. Scene 3 exposes all six existing animated text fragments separately, and `frame3Media` is the explicit config-owned final rendered image slot.
 - `narrative`: `enabled`, `headingLines`, `bodyCopy`, `images: NarrativeImageItem[]`.
 - `drawing`: `enabled`, `drawingAreaLabel`, `drawingTitle`, `drawingDescription`, `media`, optional `accentColor`.
-- `gallery`: `ProjectGalleryConfig`.
+- `gallery`: `TemplateGalleryConfig`; the heading is the shared frontend default and is not CMS-authored.
 - `navigation`: `enabled`, optional `headingLines`, renderer-facing `projects`.
 
 `NarrativeImageItem` in `src/data/templateTwoData.ts` contains `id`, `src`, `alt`, optional `focalPosition`, `depth: 'background' | 'middle' | 'foreground' | 'rear'`, and numeric `speed`.
@@ -301,7 +301,9 @@ Templates 1 and 2 store:
 }
 ```
 
-`buildHorizontalStoryConfig()` converts this to `HorizontalStoryConfig`. `images` is retained compatibility input; current configs also provide named media slots. `HorizontalGalleryItem` contains `id`, `src`, `alt`, optional focal position, width, and reveal direction.
+`buildHorizontalStoryConfig()` converts this to `HorizontalStoryConfig`. `images` is retained compatibility input; current configs also provide named media slots. Scene 3 text is never parsed from a combined heading: `frame3Heading1`, `frame3Heading2A`, `frame3Heading2B`, `frame3Heading3`, `frame3Heading4A`, and `frame3Heading4B` feed the existing fragments directly. `frame3Media` feeds the existing final editorial image.
+
+`HorizontalGalleryItem` contains `id`, `src`, `alt`, optional focal position, width, and reveal direction. Template 1 narrows `trailingImages` through `TemplateOneTrailingImages` to `[]` or tuples of one, two, three, or four items; `null` and omission also represent zero. The canonical `/template-1` config contains four examples.
 
 Template 3 has its dedicated four-frame structure listed above. Template 4 stores the shared structure directly:
 
@@ -341,7 +343,7 @@ interface ProjectGalleryImage {
 }
 ```
 
-When enabled, visible `images` must contain exactly 3, 6, or 9 records. `expandedImages` may contain more explicit records. Every visible image must also occur in the expanded collection by matching `id` or `src`. If expanded images are omitted, the visible collection is the lightbox collection. Gallery/lightbox behavior remains frontend-owned.
+When enabled, visible `images` must contain exactly 3, 6, or 9 records. `expandedImages` may contain more explicit records. Every visible image must also occur in the expanded collection by matching `id` or `src`. If expanded images are omitted, the visible collection is the lightbox collection. Template 1 and Template 2 use `TemplateGalleryConfig = Omit<ProjectGalleryConfig, 'titleLines'>`; their renderers use the shared `ProjectGallerySection` heading and do not accept project-authored Gallery title text. Gallery/lightbox behavior remains frontend-owned.
 
 ## ProjectNavigation requirements
 
